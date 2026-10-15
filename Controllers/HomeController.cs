@@ -233,13 +233,13 @@ public class HomeController : Controller
 
         if (result.Succeeded)
         {
-            if (Url.IsLocalUrl(model.ReturnUrl))
-                return LocalRedirect(model.ReturnUrl!);
-
-            // role-based redirect
-            var user = await _userManager.FindByEmailAsync(model.Email.Trim());
+            // role-based redirect — use the signed-in principal directly
+            var user = await _userManager.GetUserAsync(User);
             if (user != null)
             {
+                if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    return LocalRedirect(model.ReturnUrl);
+
                 if (await _userManager.IsInRoleAsync(user, AppRoles.GoodsOwner))
                     return RedirectToAction("Dashboard", "GoodsOwner");
                 if (await _userManager.IsInRoleAsync(user, AppRoles.VehicleOwner))

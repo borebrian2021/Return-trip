@@ -1,0 +1,263 @@
+@model GoodsOwnerDashboardViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- ── Page header ──────────────────────────────────────────────────────────── -->
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-th-large me-2" style="color:#1a3c5e;font-size:20px;"></i>Dashboard</h1>
+        <p class="dash-page-header__sub">
+            Welcome back, <strong>@Model.OwnerName</strong> &mdash;
+            @DateTime.Now.ToString("dddd, dd MMMM yyyy")
+        </p>
+    </div>
+    <div class="dash-page-header__actions">
+        <a asp-action="PostCargo" class="dash-btn dash-btn--primary">
+            <i class="fa fa-plus"></i> Post Cargo
+        </a>
+        <a asp-action="MyListings" class="dash-btn dash-btn--outline">
+            <i class="fa fa-list"></i> My Listings
+        </a>
+    </div>
+</div>
+
+<!-- ── Stat cards ───────────────────────────────────────────────────────────── -->
+<div class="dash-stat-grid">
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--blue">
+            <i class="fa fa-box-open"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.TotalListings</div>
+            <div class="dash-stat-card__label">Total Listings</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--blue">
+                <i class="fa fa-circle" style="font-size:6px;"></i> @Model.OpenListings open
+            </span>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--amber">
+            <i class="fa fa-gavel"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.ActiveBids</div>
+            <div class="dash-stat-card__label">Active Bids</div>
+            @if (Model.PendingPriceDecisions > 0)
+            {
+                <span class="dash-stat-card__badge dash-stat-card__badge--amber">
+                    <i class="fa fa-exclamation-circle" style="font-size:9px;"></i>
+                    @Model.PendingPriceDecisions awaiting decision
+                </span>
+            }
+            else
+            {
+                <span class="dash-stat-card__badge dash-stat-card__badge--green">
+                    <i class="fa fa-check" style="font-size:9px;"></i> All reviewed
+                </span>
+            }
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--teal">
+            <i class="fa fa-truck"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.InTransit</div>
+            <div class="dash-stat-card__label">In Transit</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--blue">
+                @Model.Delivered delivered
+            </span>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--green">
+            <i class="fa fa-wallet"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">R @Model.TotalSpend.ToString("N0")</div>
+            <div class="dash-stat-card__label">Total Spend</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--green">
+                Accepted bids
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Bottom two-column panels ─────────────────────────────────────────────── -->
+<div class="row g-4">
+
+    <!-- Recent listings table -->
+    <div class="col-lg-7">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-list me-2" style="color:#1a3c5e;"></i>Recent Listings</h2>
+                <a asp-action="MyListings" class="dash-panel__action">View all</a>
+            </div>
+
+            @if (!Model.RecentListings.Any())
+            {
+                <div class="dash-empty">
+                    <i class="fa fa-box-open"></i>
+                    <p>You haven't posted any cargo yet.</p>
+                    <a asp-action="PostCargo" class="dash-btn dash-btn--primary">
+                        <i class="fa fa-plus"></i> Post your first cargo
+                    </a>
+                </div>
+            }
+            else
+            {
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Cargo</th>
+                            <th>Route</th>
+                            <th>Weight</th>
+                            <th>Bids</th>
+                            <th>Status</th>
+                            <th>Departs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.RecentListings)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="td-primary">@c.Title</div>
+                                    <div class="td-muted">@c.PackageType</div>
+                                </td>
+                                <td class="td-muted">@c.Route</td>
+                                <td class="td-muted">@c.WeightKg.ToString("N0") kg</td>
+                                <td>
+                                    <span class="dash-stat-card__badge dash-stat-card__badge--@(c.BidCount > 0 ? "amber" : "blue")">
+                                        @c.BidCount
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-pill--@c.Status.ToLower()">@c.Status</span>
+                                </td>
+                                <td class="td-muted">
+                                    @(c.RequiredDepartureAt.HasValue
+                                        ? c.RequiredDepartureAt.Value.ToString("dd MMM")
+                                        : "—")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <!-- Recent bids panel -->
+    <div class="col-lg-5">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-gavel me-2" style="color:#d4890a;"></i>Recent Bids</h2>
+                <a asp-action="Bids" class="dash-panel__action">View all</a>
+            </div>
+
+            @if (!Model.RecentBids.Any())
+            {
+                <div class="dash-empty">
+                    <i class="fa fa-gavel"></i>
+                    <p>No bids received yet. Post cargo to start receiving bids.</p>
+                </div>
+            }
+            else
+            {
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Cargo</th>
+                            <th>Agent</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.RecentBids)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="td-primary">@b.CargoTitle</div>
+                                    <div class="td-muted" style="font-size:11px;">@b.Route</div>
+                                </td>
+                                <td class="td-muted">@b.AgentName</td>
+                                <td class="td-primary">R @b.BidAmount.ToString("N0")</td>
+                                <td>
+                                    <span class="status-pill status-pill--@b.BidStatus.ToLower()">@b.BidStatus</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Monthly activity sparkline ───────────────────────────────────────────── -->
+<div class="row g-4 mt-0">
+    <div class="col-12">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title">
+                    <i class="fa fa-chart-line me-2" style="color:#1a3c5e;"></i>Cargo Posted — Last 6 Months
+                </h2>
+            </div>
+            <div style="padding:24px 28px 28px;">
+                <canvas id="monthlyChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const labels  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyListings.Select(m => m.Month)));
+    const data    = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyListings.Select(m => m.Count)));
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Cargo Listed',
+                data: data,
+                borderColor: '#1a3c5e',
+                backgroundColor: 'rgba(26,60,94,.08)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#1a3c5e',
+                pointRadius: 5,
+                tension: 0.35,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1a3c5e',
+                    titleFont: { family: 'Inter', size: 12 },
+                    bodyFont:  { family: 'Inter', size: 13 },
+                    callbacks: { label: ctx => ` ${ctx.parsed.y} listing${ctx.parsed.y !== 1 ? 's' : ''}` }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 12 } } },
+                y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Inter', size: 12 } }, grid: { color: '#f0f2f1' } }
+            }
+        }
+    });
+</script>
+}

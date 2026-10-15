@@ -1,27 +1,48 @@
 @model Return_trip.Models.RegistrationSuccessViewModel
 @{
     Layout = "_RegistrationLayout";
-    ViewData["Title"] = "Registration submitted";
+    ViewData["Title"] = "Registration Complete";
+    bool isReady   = Model.RoleLabel == "Goods owner";
+    bool isVehicle = Model.RoleLabel == "Vehicle owner";
 }
 
-<div class="wpb-content-wrapper">
-    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
-        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
-            <div class="stm_auto_loan_calculator wide-version rt-registration-success">
-                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>@(Model.RoleLabel == "Goods owner" ? "Account ready" : "Registration submitted")</h3></div>
-                <h4 class="heading-font">@(Model.RoleLabel == "Goods owner" ? "Your Goods Owner account is ready" : $"{Model.RoleLabel} registration received")</h4>
-                <p>@Model.Message</p>
-                <a class="button button-sm" asp-action="Register">Register another profile</a>
-                @if (Model.RoleLabel == "Vehicle owner")
-                {
-                    <a class="button button-sm" asp-action="AddDriver">Register a driver</a>
-                    <a class="button button-sm" asp-action="AddAgent">Register an agent</a>
-                }
-                <a class="button button-sm" asp-action="Index">Return to home</a>
-            </div>
-        </div></div></div>
-        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
-            <div class="widget widget_pages"><div class="widget-title"><h6>@(Model.RoleLabel == "Goods owner" ? "You are signed in" : "What happens next?")</h6></div><p>@(Model.RoleLabel == "Goods owner" ? "Your account is ready. Return to the home page to continue with Return Trip." : "Your account request has been recorded for the next step in the Return Trip registration flow.")</p></div>
-        </div></div></div>
+<div class="auth-card text-center">
+    <div class="auth-success-icon mx-auto">
+        <i class="fa @(isReady ? "fa-check" : "fa-paper-plane")"></i>
+    </div>
+
+    <p class="auth-card__eyebrow">
+        @(isReady ? "You're all set" : "Submitted")
+    </p>
+    <h1 class="auth-card__title">
+        @(isReady ? "Account ready!" : $"{Model.RoleLabel} registration received")
+    </h1>
+    <p class="auth-card__sub">@Model.Message</p>
+
+    <div class="auth-action-group justify-content-center">
+        <a asp-action="Index" class="auth-btn-primary" style="flex:1;max-width:220px;">
+            <i class="fa fa-home me-2"></i>Go to Home
+        </a>
+        @if (isVehicle)
+        {
+            <a asp-action="AddDriver" class="auth-btn-secondary">
+                <i class="fa fa-id-card me-1"></i>Add Driver
+            </a>
+            <a asp-action="AddAgent" class="auth-btn-secondary">
+                <i class="fa fa-user-tie me-1"></i>Add Agent
+            </a>
+        }
+        <a asp-action="Register" class="auth-btn-secondary">
+            <i class="fa fa-plus me-1"></i>Register Another
+        </a>
     </div>
 </div>
+
+@if (isVehicle)
+{
+    <div class="auth-info-banner mt-3">
+        <strong><i class="fa fa-lightbulb me-1"></i>Next steps for vehicle owners</strong>
+        Now that your account is created, register your drivers and company agents so they
+        can claim their own profiles and start bidding on cargo listings.
+    </div>
+}

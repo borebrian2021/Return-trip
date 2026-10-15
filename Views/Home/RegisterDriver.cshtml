@@ -1,29 +1,52 @@
 @model Return_trip.Models.DriverIdLookupViewModel
 @{
     Layout = "_RegistrationLayout";
-    ViewData["Title"] = "Claim driver profile";
+    ViewData["Title"] = "Claim Driver Profile";
 }
 
-<div class="wpb-content-wrapper">
-    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
-        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
-            <div class="wpb_text_column wpb_content_element rt-registration-intro"><div class="wpb_wrapper">
-                <p>Your vehicle owner must register your driver details before you can create a sign-in. Enter your national ID to find the existing profile.</p>
-            </div></div>
-            <div class="stm_auto_loan_calculator wide-version">
-                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Find Your Driver Profile</h3></div>
-                <form asp-action="RegisterDriver" method="post" class="rt-registration-form">
-                    @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
-                    <div class="row">
-                        <div class="col-md-12"><div class="form-group"><div class="labeled heading-font"><label asp-for="IdNumber"></label></div><input asp-for="IdNumber" class="form-control" autocomplete="off" /><span asp-validation-for="IdNumber"></span></div></div>
-                        <div class="col-md-12"><button type="submit" class="button button-sm">Find my profile</button></div>
-                    </div>
-                </form>
-            </div>
-        </div></div></div>
-        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
-            <div class="widget widget_pages"><div class="widget-title"><h6>Driver onboarding</h6></div><p>Your vehicle owner enters your name, ID, licence, phone and email. The system uses your ID to verify that profile, then asks you only to confirm your registered email and create a password.</p></div>
-        </div></div></div>
-    </div>
+<div class="auth-card">
+    <p class="auth-card__eyebrow"><i class="fa fa-id-card me-1"></i>Driver</p>
+    <h1 class="auth-card__title">Find your profile</h1>
+    <p class="auth-card__sub">
+        Your vehicle owner must register your details first. Enter your national ID number
+        to locate your driver profile and activate your sign-in.
+    </p>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="auth-alert">
+            <div asp-validation-summary="ModelOnly"></div>
+        </div>
+    }
+
+    <form asp-action="RegisterDriver" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="auth-field">
+            <label asp-for="IdNumber">National ID Number</label>
+            <input asp-for="IdNumber" class="form-control" autocomplete="off"
+                   placeholder="Enter your 13-digit ID number" style="letter-spacing:.5px;" />
+            <span asp-validation-for="IdNumber" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="auth-btn-primary mt-2">
+            <i class="fa fa-search me-2"></i>Find My Driver Profile
+        </button>
+    </form>
+
+    <hr>
+    <p class="text-center mb-0" style="font-size:14px;color:#9a9a9a;">
+        Not a driver?
+        <a asp-action="Register" style="color:#1a3c5e;font-weight:600;text-decoration:none;">Choose a different role</a>
+    </p>
 </div>
+
+<div class="auth-info-banner mt-3">
+    <strong><i class="fa fa-info-circle me-1"></i>How driver onboarding works</strong>
+    Your vehicle owner enters your name, ID number, licence details, phone, and email.
+    The system matches your ID to that record, then asks you to confirm the email and set a password.
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

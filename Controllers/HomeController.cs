@@ -86,7 +86,7 @@ public class HomeController : Controller
         await _signInManager.SignInAsync(user, isPersistent: false);
 
         TempData["RegistrationSuccess"] = "Your goods owner account was created and you are signed in.";
-        return RedirectToAction(nameof(RegisterSuccess), new { role = "Goods owner" });
+        return RedirectToAction("Dashboard", "GoodsOwner");
     }
 
     [HttpGet]
@@ -233,9 +233,24 @@ public class HomeController : Controller
 
         if (result.Succeeded)
         {
-            return Url.IsLocalUrl(model.ReturnUrl)
-                ? LocalRedirect(model.ReturnUrl!)
-                : RedirectToAction(nameof(Index));
+            if (Url.IsLocalUrl(model.ReturnUrl))
+                return LocalRedirect(model.ReturnUrl!);
+
+            // role-based redirect
+            var user = await _userManager.FindByEmailAsync(model.Email.Trim());
+            if (user != null)
+            {
+                if (await _userManager.IsInRoleAsync(user, AppRoles.GoodsOwner))
+                    return RedirectToAction("Dashboard", "GoodsOwner");
+                if (await _userManager.IsInRoleAsync(user, AppRoles.VehicleOwner))
+                    return RedirectToAction("Dashboard", "VehicleOwner");
+                if (await _userManager.IsInRoleAsync(user, AppRoles.Driver))
+                    return RedirectToAction("Dashboard", "Driver");
+                if (await _userManager.IsInRoleAsync(user, AppRoles.CompanyAgent))
+                    return RedirectToAction("Dashboard", "Agent");
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         ModelState.AddModelError(string.Empty,

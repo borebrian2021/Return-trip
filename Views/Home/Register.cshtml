@@ -1,62 +1,60 @@
 @{
     Layout = "_RegistrationLayout";
-    ViewData["Title"] = "Choose registration";
+    ViewData["Title"] = "Create an Account";
 }
 
-<div class="wpb-content-wrapper">
-    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
-        <div class="wpb_column vc_column_container vc_col-sm-9">
-            <div class="vc_column-inner">
-                <div class="wpb_wrapper">
-                    <div class="wpb_text_column wpb_content_element rt-registration-intro">
-                        <div class="wpb_wrapper">
-                            <p>Choose the account that matches your role in the freight journey. Goods owners post cargo, vehicle owners manage fleets, and drivers register through the fleet they work with. Company agents are onboarded by their vehicle owner.</p>
-                        </div>
-                    </div>
+<div class="auth-card">
+    <p class="auth-card__eyebrow"><i class="fa fa-user-plus me-1"></i>Get Started</p>
+    <h1 class="auth-card__title">Choose your role</h1>
+    <p class="auth-card__sub">
+        Select the account type that matches your place in the freight journey.
+        All roles are free to register.
+    </p>
 
-                    <div class="stm_auto_loan_calculator wide-version rt-registration-roles">
-                        <div class="title single-calculator-title">
-                            <i class="stm-icon-calculator"></i>
-                            <h3>Register with Return Trip</h3>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="role-option">
-                                    <h4 class="heading-font">Goods owner</h4>
-                                    <p>Post freight requests and connect your cargo with available return-trip vehicles.</p>
-                                    <a class="button button-sm" asp-action="RegisterGoodsOwner">Register as goods owner</a>
-                                </div>
-                                <div class="role-option">
-                                    <h4 class="heading-font">Vehicle owner</h4>
-                                    <p>Register your transport business and manage your vehicles, drivers, and company agents.</p>
-                                    <a class="button button-sm" asp-action="RegisterVehicleOwner">Register as vehicle owner</a>
-                                </div>
-                                <div class="role-option">
-                                    <h4 class="heading-font">Driver</h4>
-                                    <p>Your vehicle owner records your driver details first. Use your ID to find that profile and create your sign-in.</p>
-                                    <a class="button button-sm" asp-action="RegisterDriver">Register as driver</a>
-                                </div>
-                                <div class="role-option">
-                                    <h4 class="heading-font">Company agent</h4>
-                                    <p>Your vehicle owner enters your agent details first. Claim the existing profile using its registered email.</p>
-                                    <a class="button button-sm" asp-action="RegisterAgent">Claim agent profile</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="role-cards">
+
+        <a class="role-card" asp-action="RegisterGoodsOwner">
+            <div class="role-card__icon"><i class="fa fa-box-open"></i></div>
+            <div class="role-card__body">
+                <div class="role-card__title">Goods Owner</div>
+                <p class="role-card__desc">Post cargo requests and connect your freight with return-trip vehicles.</p>
             </div>
-        </div>
-        <div class="wpb_column vc_column_container vc_col-sm-3">
-            <div class="vc_column-inner">
-                <div class="wpb_wrapper rt-registration-sidebar">
-                    <div class="widget widget_pages">
-                        <div class="widget-title"><h6>Registration guide</h6></div>
-                        <p>Goods owners and vehicle owners can start with a direct registration. Driver accounts must be connected to a fleet. Agent access is requested through the vehicle owner.</p>
-                        <p><a asp-controller="Home" asp-action="Index">Return to Return Trip home</a></p>
-                    </div>
-                </div>
+            <i class="fa fa-chevron-right role-card__arrow"></i>
+        </a>
+
+        <a class="role-card" asp-action="RegisterVehicleOwner">
+            <div class="role-card__icon"><i class="fa fa-truck"></i></div>
+            <div class="role-card__body">
+                <div class="role-card__title">Vehicle Owner</div>
+                <p class="role-card__desc">Register your fleet, manage drivers and agents, and earn on return trips.</p>
             </div>
-        </div>
+            <i class="fa fa-chevron-right role-card__arrow"></i>
+        </a>
+
+        <a class="role-card" asp-action="RegisterDriver">
+            <div class="role-card__icon"><i class="fa fa-id-card"></i></div>
+            <div class="role-card__body">
+                <div class="role-card__title">Driver</div>
+                <p class="role-card__desc">Claim the profile your vehicle owner created for you using your national ID.</p>
+            </div>
+            <i class="fa fa-chevron-right role-card__arrow"></i>
+        </a>
+
+        <a class="role-card" asp-action="RegisterAgent">
+            <div class="role-card__icon"><i class="fa fa-user-tie"></i></div>
+            <div class="role-card__body">
+                <div class="role-card__title">Company Agent</div>
+                <p class="role-card__desc">Claim the agent profile entered by your vehicle owner using your registered email.</p>
+            </div>
+            <i class="fa fa-chevron-right role-card__arrow"></i>
+        </a>
+
     </div>
+
+    <hr>
+
+    <p class="text-center mb-0" style="font-size:14px;color:#9a9a9a;">
+        Already have an account?
+        <a asp-action="Login" style="color:#1a3c5e;font-weight:600;text-decoration:none;">Sign in</a>
+    </p>
 </div>

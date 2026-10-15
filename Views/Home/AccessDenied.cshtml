@@ -1,17 +1,26 @@
 @{
     Layout = "_RegistrationLayout";
-    ViewData["Title"] = "Access denied";
+    ViewData["Title"] = "Access Denied";
 }
 
-<div class="wpb-content-wrapper">
-    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
-        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
-            <div class="stm_auto_loan_calculator wide-version rt-registration-success">
-                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Access denied</h3></div>
-                <p>Your account does not have permission to access this page.</p>
-                <a class="button button-sm" asp-action="Index">Return to home</a>
-                <a class="button button-sm" asp-action="Login">Sign in</a>
-            </div>
-        </div></div></div>
+<div class="auth-card text-center">
+    <div class="auth-denied-icon mx-auto">
+        <i class="fa fa-ban"></i>
+    </div>
+
+    <p class="auth-card__eyebrow">403 — Forbidden</p>
+    <h1 class="auth-card__title">Access denied</h1>
+    <p class="auth-card__sub">
+        Your account does not have permission to access that page.
+        If you think this is a mistake, please sign in with the correct account.
+    </p>
+
+    <div class="auth-action-group justify-content-center">
+        <a asp-action="Index" class="auth-btn-primary" style="flex:1;max-width:200px;">
+            <i class="fa fa-home me-2"></i>Go to Home
+        </a>
+        <a asp-action="Login" class="auth-btn-secondary">
+            <i class="fa fa-sign-in-alt me-1"></i>Sign In
+        </a>
     </div>
 </div>

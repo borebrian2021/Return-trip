@@ -1,97 +1,46 @@
-<!DOCTYPE html>
-<html lang="en-US" class="no-js">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Return Trip</title>
-    <link rel="stylesheet" href="~/wp-content/cache/autoptimize/5/css/autoptimize_9c53a34163c51bbaeb54dfdc03768da3.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/wp-content/themes/motors-child-demo/assets/registration/registration-template.css" asp-append-version="true" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewData["Title"] – Return Trip</title>
+    <link rel="shortcut icon" href="~/favicon.png">
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="~/css/site.css" rel="stylesheet">
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="wp-singular page page-template-default wp-theme-motors wp-child-theme-motors-child-demo theme-motors stm-user-not-logged-in woocommerce-no-js stm-template-motorcycle header_remove_cart stm-layout-header-motorcycle wpb-js-composer vc_responsive">
-    <div id="wrapper">
-        <div id="top-bar">
-            <div class="container">
-                <div class="clearfix top-bar-wrapper">
-                    <div class="pull-right xs-pull-left top-bar-info-wrap">
-                        <ul class="top-bar-info clearfix">
-                            <li><i class="fas fa-truck"></i> Freight journeys, connected</li>
-                            <li><i class="fas fa-map-marker"></i> Coordinating every return trip</li>
-                        </ul>
-                    </div>
-                </div>
+<body class="auth-page">
+
+    <!-- minimal nav -->
+    <nav class="custom-navbar navbar navbar-expand-md navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                Return Trip<span>.</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <a asp-controller="Home" asp-action="Login"
+                   class="nav-link text-white" style="opacity:.7;font-size:14px;">
+                    <i class="fa fa-sign-in-alt me-1"></i>Sign In
+                </a>
+                <a asp-controller="Home" asp-action="Register"
+                   class="btn btn-secondary" style="padding:8px 22px;font-size:13px;">
+                    Register
+                </a>
             </div>
         </div>
+    </nav>
 
-        <div id="header">
-            <div class="stm_motorcycle-header header-listing-fixed">
-                <div class="stm_mc-main header-main">
-                    <div class="container clearfix">
-                        <div class="left"><div class="clearfix"></div></div>
-                        <div class="right">
-                            <a class="bloglogo hidden-xs" asp-controller="Home" asp-action="Index">
-                                <span class="rt-registration-brand">Return <span>Trip</span></span>
-                            </a>
-                            <div class="right-right">
-                                <div class="clearfix">
-                                    <div class="pull-right">
-                                        <div class="header-main-phone heading-font">
-                                            <div class="phone"><span class="phone-number heading-font">Freight • Fleet • Delivery</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stm_mc-nav">
-                    <div class="mobile-logo-wrap">
-                        <a class="bloglogo" asp-controller="Home" asp-action="Index"><span class="rt-registration-brand">Return <span>Trip</span></span></a>
-                    </div>
-                    <div class="mobile-menu-trigger" aria-label="Open navigation"><span></span><span></span><span></span></div>
-                    <div class="main-menu hidden-xs">
-                        <div class="container">
-                            <div class="inner">
-                                <ul class="header-menu clearfix">
-                                    <li class="menu-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-                                    <li class="menu-item"><a asp-controller="Home" asp-action="Register">Register</a></li>
-                                    <li class="menu-item"><a asp-controller="Home" asp-action="Journey">Journey preview</a></li>
-                                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole(AppRoles.VehicleOwner))
-                                    {
-                                        <li class="menu-item"><a asp-controller="Home" asp-action="AddDriver">Register a driver</a></li>
-                                        <li class="menu-item"><a asp-controller="Home" asp-action="AddAgent">Register an agent</a></li>
-                                    }
-                                    @if (User.Identity?.IsAuthenticated == true)
-                                    {
-                                        <li class="menu-item">
-                                            <form asp-controller="Home" asp-action="Logout" method="post">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="button button-sm">Sign out</button>
-                                            </form>
-                                        </li>
-                                    }
-                                    else
-                                    {
-                                        <li class="menu-item"><a asp-controller="Home" asp-action="Login">Sign in</a></li>
-                                    }
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="main">
-            <div class="container">
+    <!-- auth shell: centred form -->
+    <div class="auth-shell">
+        <div class="auth-panel-right auth-panel-center">
+            <div class="auth-form-wrap">
                 @RenderBody()
             </div>
         </div>
     </div>
-    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
-    <script src="~/wp-content/cache/autoptimize/5/js/autoptimize_2109928a68d48cf46f2b681a432f5eed.js" asp-append-version="true"></script>
-    <script src="~/wp-content/cache/autoptimize/5/js/autoptimize_single_49c8cd7cd61aef79b261210787eb5c5d676d.js" asp-append-version="true"></script>
+
+    <script src="~/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

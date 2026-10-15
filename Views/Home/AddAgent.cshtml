@@ -1,0 +1,29 @@
+@model Return_trip.Models.AgentProfileViewModel
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Add a company agent";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
+            <div class="wpb_text_column wpb_content_element rt-registration-intro"><div class="wpb_wrapper"><p>Register the agent's official name, email and phone. The agent uses the registered email to claim the profile and create a password.</p></div></div>
+            <div class="stm_auto_loan_calculator wide-version">
+                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Register Agent Details</h3></div>
+                <form asp-action="AddAgent" method="post" class="rt-registration-form">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                    <div class="row">
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="FullName"></label></div><input asp-for="FullName" class="form-control" autocomplete="name" /><span asp-validation-for="FullName"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="Email"></label></div><input asp-for="Email" class="form-control" type="email" autocomplete="email" /><span asp-validation-for="Email"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="PhoneNumber"></label></div><input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" /><span asp-validation-for="PhoneNumber"></span></div></div>
+                        <div class="col-md-12"><button type="submit" class="button button-sm">Save agent profile</button></div>
+                    </div>
+                </form>
+            </div>
+        </div></div></div>
+        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
+            <div class="widget widget_pages"><div class="widget-title"><h6>Vehicle-owner access</h6></div><p>This form is restricted to signed-in vehicle owners. The fleet relationship is attached from your account and cannot be chosen by the agent.</p></div>
+        </div></div></div>
+    </div>
+</div>

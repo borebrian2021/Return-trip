@@ -1,0 +1,30 @@
+@model Return_trip.Models.LoginViewModel
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
+            <div class="wpb_text_column wpb_content_element rt-registration-intro"><div class="wpb_wrapper"><p>Sign in to continue to your Return Trip workspace.</p></div></div>
+            <div class="stm_auto_loan_calculator wide-version">
+                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Sign in</h3></div>
+                <form asp-action="Login" method="post" class="rt-registration-form">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                    <div class="row">
+                        <div class="col-md-12"><div class="form-group"><div class="labeled heading-font"><label asp-for="Email"></label></div><input asp-for="Email" class="form-control" type="email" autocomplete="username" /><span asp-validation-for="Email"></span></div></div>
+                        <div class="col-md-12"><div class="form-group"><div class="labeled heading-font"><label asp-for="Password"></label></div><input asp-for="Password" class="form-control" type="password" autocomplete="current-password" /><span asp-validation-for="Password"></span></div></div>
+                        <div class="col-md-12"><div class="form-group"><label><input asp-for="RememberMe" /> Keep me signed in</label></div></div>
+                        <div class="col-md-12"><button type="submit" class="button button-sm">Sign in</button> <a asp-action="Register" class="button button-sm">Create an account</a></div>
+                    </div>
+                </form>
+            </div>
+        </div></div></div>
+        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
+            <div class="widget widget_pages"><div class="widget-title"><h6>Use your account email</h6></div><p>Goods owners and vehicle owners sign in with the email and password chosen at registration. Drivers first claim the profile entered by their vehicle owner.</p></div>
+        </div></div></div>
+    </div>
+</div>

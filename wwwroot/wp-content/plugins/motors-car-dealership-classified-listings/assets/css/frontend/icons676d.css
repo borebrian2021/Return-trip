@@ -1,0 +1,2102 @@
+@font-face {
+    font-family: "motors-icons";
+    src: url("../../fonts/motors/motors-iconsd7de.ttf?nrbx13") format("truetype"), url("../../fonts/motors/motors-iconsd7de.woff?nrbx13") format("woff"), url("../../fonts/motors/motors-iconsd7de.svg?nrbx13#motors-icons") format("svg");
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+}
+
+.fa:before,
+.fas:before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.fa-classic::before,
+.fa-regular::before,
+.fa-solid::before,
+.far::before,
+.fas::before {
+    font-family: "Font Awesome 6 Free";
+}
+
+.fa-brands::before,
+.fab::before {
+    font-family: "Font Awesome 5 Brands";
+}
+
+[class^=motors-icons-]::before,
+[class*=" motors-icons-"]::before,
+i {
+  /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: "motors-icons";
+    speak: never;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+  /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.motors-icons-check-square:before {
+    content: "\ea2d";
+}
+
+.motors-icons-clock-square:before {
+    content: "\ea2e";
+}
+
+.motors-icons-development-03:before {
+    content: "\ea2f";
+}
+
+.motors-icons-dropdown:before {
+    content: "\ea30";
+}
+
+.motors-icons-icon-drag:before {
+    content: "\ea31";
+}
+
+.motors-icons-image:before {
+    content: "\ea32";
+}
+
+.motors-icons-input:before {
+    content: "\ea33";
+}
+
+.motors-icons-mailbox:before {
+    content: "\ea34";
+}
+
+.motors-icons-phone-call:before {
+    content: "\ea35";
+}
+
+.motors-icons-plus:before {
+    content: "\ea36";
+}
+
+.motors-icons-radio:before {
+    content: "\ea37";
+}
+
+.motors-icons-reverse:before {
+    content: "\ea38";
+}
+
+.motors-icons-textarea:before {
+    content: "\ea39";
+}
+
+.motors-icons-upload:before {
+    content: "\ea3a";
+}
+
+.motors-icons-angle-right:before {
+    content: "\ea2c";
+}
+
+.motors-icons-mobile:before {
+    content: "\ea2a";
+}
+
+.motors-icons-desktop:before {
+    content: "\ea2b";
+}
+
+.motors-icons-chevron-up:before {
+    content: "\ea25";
+}
+
+.motors-icons-info-filled:before {
+    content: "\ea26";
+}
+
+.motors-icons-upload-2:before {
+    content: "\ea27";
+}
+
+.motors-icons-chat-2:before {
+    content: "\ea28";
+}
+
+.motors-icons-user-stroked:before {
+    content: "\ea29";
+}
+
+.motors-icons-palette:before {
+    content: "\ea1c";
+}
+
+.motors-icons-sport-car:before {
+    content: "\ea1d";
+}
+
+.motors-icons-stat-outline:before {
+    content: "\ea1e";
+}
+
+.motors-icons-swatchbook:before {
+    content: "\ea1f";
+}
+
+.motors-icons-circle-check:before {
+    content: "\ea20";
+}
+
+.motors-icons-gear-rotation:before {
+    content: "\ea21";
+}
+
+.motors-icons-mini-track:before {
+    content: "\ea22";
+}
+
+.motors-icons-oultine-engine:before {
+    content: "\ea23";
+}
+
+.motors-icons-outline-brochure:before {
+    content: "\ea24";
+}
+
+.motors-icons-mvl-compare:before {
+    content: "\ea1b";
+}
+
+.motors-icons-image-plus:before {
+    content: "\ea1a";
+}
+
+.motors-icons-mvl_file_select:before {
+    content: "\ea19";
+}
+
+.motors-icons-mvl-bolt:before {
+    content: "\ea0f";
+}
+
+.motors-icons-mvl-eye:before {
+    content: "\ea10";
+}
+
+.motors-icons-mvl-home:before {
+    content: "\ea11";
+}
+
+.motors-icons-mvl-info:before {
+    content: "\ea12";
+}
+
+.motors-icons-mvl-layers:before {
+    content: "\ea13";
+}
+
+.motors-icons-mvl-media:before {
+    content: "\ea14";
+}
+
+.motors-icons-mvl-pencil:before {
+    content: "\ea15";
+}
+
+.motors-icons-mvl-settings:before {
+    content: "\ea16";
+}
+
+.motors-icons-mvl-trash:before {
+    content: "\ea17";
+}
+
+.motors-icons-mvl-wallet:before {
+    content: "\ea18";
+}
+
+.motors-icons-mvl-search:before {
+    content: "\ea0d";
+}
+
+.motors-icons-mvl-slider-vertical:before {
+    content: "\ea0e";
+}
+
+.motors-icons-bell-mvl-ico:before {
+    content: "\ea0c";
+}
+
+.motors-icons-chevron-down-ico:before {
+    content: "\e9ff";
+}
+
+.motors-icons-cross-ico:before {
+    content: "\ea00";
+}
+
+.motors-icons-grid-view-ico:before {
+    content: "\ea01";
+}
+
+.motors-icons-list-view-ico:before {
+    content: "\ea02";
+}
+
+.motors-icons-scales-ico:before {
+    content: "\ea03";
+}
+
+.motors-icons-switch-vertical-ico:before {
+    content: "\ea04";
+}
+
+.motors-icons-scales-ico:before {
+    content: "\ea03";
+}
+
+.motors-icons-switch-vertical-ico:before {
+    content: "\ea04";
+}
+
+.motors-icons-call-outline:before {
+    content: "\ea05";
+}
+
+.motors-icons-car-sport-outline:before {
+    content: "\ea06";
+}
+
+.motors-icons-location-outline:before {
+    content: "\ea07";
+}
+
+.motors-icons-mail-outline:before {
+    content: "\ea08";
+}
+
+.motors-icons-people-outline:before {
+    content: "\ea09";
+}
+
+.motors-icons-pricetags-outline:before {
+    content: "\ea0a";
+}
+
+.motors-icons-time-outline:before {
+    content: "\ea0b";
+}
+
+.motors-icons-flame-skin:before {
+    content: "\e9fa";
+}
+
+.motors-icons-phone-call-skin:before {
+    content: "\e9fb";
+}
+
+.motors-icons-share-skin:before {
+    content: "\e9fc";
+}
+
+.motors-icons-steering-wheel-skin:before {
+    content: "\e9fd";
+}
+
+.motors-icons-switch-horizontal-skin:before {
+    content: "\e9fe";
+}
+
+.motors-icons-photoaparat:before {
+    content: "\e9e6";
+}
+
+.motors-icons-actions-fav-white:before {
+    content: "\e9e7";
+}
+
+.motors-icons-arrow-top-right:before {
+    content: "\e9e8";
+}
+
+.motors-icons-calendar-icon:before {
+    content: "\e9e9";
+}
+
+.motors-icons-check-circle:before {
+    content: "\e9ea";
+}
+
+.motors-icons-dots-vertical:before {
+    content: "\e9eb";
+}
+
+.motors-icons-gas-pump:before {
+    content: "\e9f4";
+}
+
+.motors-icons-gear-arrow:before {
+    content: "\e9f5";
+}
+
+.motors-icons-gearbox:before {
+    content: "\e9f6";
+}
+
+.motors-icons-pin-map:before {
+    content: "\e9f7";
+}
+
+.motors-icons-scales:before {
+    content: "\e9f8";
+}
+
+.motors-icons-tachometer:before {
+    content: "\e9f9";
+}
+
+.motors-icons-checked-ico:before {
+    content: "\e9ed";
+}
+
+.motors-icons-dollar-ico:before {
+    content: "\e9ee";
+}
+
+.motors-icons-list-items-ico:before {
+    content: "\e9ef";
+}
+
+.motors-icons-map-pin-ico:before {
+    content: "\e9f0";
+}
+
+.motors-icons-media-ico:before {
+    content: "\e9f1";
+}
+
+.motors-icons-simple-car-ico:before {
+    content: "\e9f2";
+}
+
+.motors-icons-speed-control-ico:before {
+    content: "\e9f3";
+}
+
+.motors-icons-stm-moto-icon-cash:before {
+    content: "\e9ec";
+}
+
+.motors-icons-phone-o:before {
+    content: "\e989";
+}
+
+.motors-icons-whatsapp:before {
+    content: "\e98a";
+}
+
+.motors-icons-album:before {
+    content: "\e98b";
+}
+
+.motors-icons-steering-wheel-thin:before {
+    content: "\e98c";
+}
+
+.motors-icons-pin-o:before {
+    content: "\e98d";
+}
+
+.motors-icons-hexagon-fill:before {
+    content: "\e98e";
+}
+
+.motors-icons-battery:before {
+    content: "\e98f";
+}
+
+.motors-icons-brochures:before {
+    content: "\e990";
+}
+
+.motors-icons-charge-bolt:before {
+    content: "\e991";
+}
+
+.motors-icons-checked:before {
+    content: "\e993";
+}
+
+.motors-icons-twisted-plug:before {
+    content: "\e996";
+}
+
+.motors-icons-light-envelope:before {
+    content: "\e998";
+}
+
+.motors-icons-location-flag:before {
+    content: "\e99a";
+}
+
+.motors-icons-speedometr-advance:before {
+    content: "\e99b";
+}
+
+.motors-icons-no-oil-sign:before {
+    content: "\e99c";
+}
+
+.motors-icons-charging-cost:before {
+    content: "\e99d";
+}
+
+.motors-icons-hexagon-right:before {
+    content: "\e99e";
+}
+
+.motors-icons-hexagon-left:before {
+    content: "\e99f";
+}
+
+.motors-icons-light-circle-check:before {
+    content: "\e9a0";
+}
+
+.motors-icons-light-zoom-in:before {
+    content: "\e9a1";
+}
+
+.motors-icons-close-times:before {
+    content: "\e9a2";
+}
+
+.motors-icons-leaf:before {
+    content: "\e9a3";
+}
+
+.motors-icons-percentage:before {
+    content: "\e9a4";
+}
+
+.motors-icons-share-social:before {
+    content: "\e9a5";
+}
+
+.motors-icons-shopping-cart-1:before {
+    content: "\e9a6";
+}
+
+.motors-icons-speedometer-circular-tool:before {
+    content: "\e9a7";
+}
+
+.motors-icons-telephone:before {
+    content: "\e9a8";
+}
+
+.motors-icons-electric-engine:before {
+    content: "\e9a9";
+}
+
+.motors-icons-car-spin:before {
+    content: "\e9aa";
+}
+
+.motors-icons-speedometr2:before {
+    content: "\e800";
+}
+
+.motors-icons-shop_bag:before {
+    content: "\e801";
+}
+
+.motors-icons-chat2:before {
+    content: "\e802";
+}
+
+.motors-icons-car1:before {
+    content: "\e803";
+}
+
+.motors-icons-car_search:before {
+    content: "\e804";
+}
+
+.motors-icons-label:before {
+    content: "\e805";
+}
+
+.motors-icons-speedometr:before {
+    content: "\e806";
+}
+
+.motors-icons-chat1:before {
+    content: "\e807";
+}
+
+.motors-icons-application:before {
+    content: "\e808";
+}
+
+.motors-icons-message1:before {
+    content: "\e809";
+}
+
+.motors-icons-car_sale:before {
+    content: "\e80a";
+}
+
+.motors-icons-phone3:before {
+    content: "\e80b";
+}
+
+.motors-icons-label-reverse:before {
+    content: "\e80c";
+}
+
+.motors-icons-transmission:before {
+    content: "\e80d";
+}
+
+.motors-icons-fuel1:before {
+    content: "\e80e";
+}
+
+.motors-icons-road:before {
+    content: "\e80f";
+}
+
+.motors-icons-search:before {
+    content: "\e810";
+}
+
+.motors-icons-reset:before {
+    content: "\e811";
+}
+
+.motors-icons-phone21:before {
+    content: "\e812";
+}
+
+.motors-icons-question:before {
+    content: "\e813";
+}
+
+.motors-icons-steering_wheel:before {
+    content: "\e814";
+}
+
+.motors-icons-gear:before {
+    content: "\e9ab";
+}
+
+.motors-icons-key:before {
+    content: "\e9ac";
+}
+
+.motors-icons-calendar1:before {
+    content: "\e9ad";
+}
+
+.motors-icons-oil:before {
+    content: "\e9ae";
+}
+
+.motors-icons-diagnostic:before {
+    content: "\e9af";
+}
+
+.motors-icons-Tire_Wheel_Service2:before {
+    content: "\e9b0";
+}
+
+.motors-icons-Tire_Wheel_Service:before {
+    content: "\e9b1";
+}
+
+.motors-icons-auto_loan:before {
+    content: "\e9b2";
+}
+
+.motors-icons-engine:before {
+    content: "\e9b3";
+}
+
+.motors-icons-speedometr3:before {
+    content: "\e9b4";
+}
+
+.motors-icons-transmission2:before {
+    content: "\e9b5";
+}
+
+.motors-icons-mail1:before {
+    content: "\e9b6";
+}
+
+.motors-icons-pin2:before {
+    content: "\e9b7";
+}
+
+.motors-icons-delete:before {
+    content: "\e9b8";
+}
+
+.motors-icons-share1:before {
+    content: "\e9b9";
+}
+
+.motors-icons-calculator:before {
+    content: "\e9ba";
+}
+
+.motors-icons-added:before {
+    content: "\e9bb";
+}
+
+.motors-icons-brochure:before {
+    content: "\e9bc";
+}
+
+.motors-icons-add:before {
+    content: "\e9bd";
+}
+
+.motors-icons-remove:before {
+    content: "\e9be";
+}
+
+.motors-icons-add_car1:before {
+    content: "\e9bf";
+}
+
+.motors-icons-air_conditioning:before {
+    content: "\e9c0";
+}
+
+.motors-icons-auto_electric:before {
+    content: "\e9c1";
+}
+
+.motors-icons-brake:before {
+    content: "\e9c2";
+}
+
+.motors-icons-oil-add:before {
+    content: "\e9c3";
+}
+
+.motors-icons-Tire_Wheel:before {
+    content: "\e9c4";
+}
+
+.motors-icons-load2:before {
+    content: "\e9c5";
+}
+
+.motors-icons-load1:before {
+    content: "\e9c6";
+}
+
+.motors-icons-transmission_fill:before {
+    content: "\e9c7";
+}
+
+.motors-icons-drive_2:before {
+    content: "\e9c8";
+}
+
+.motors-icons-engine_fill:before {
+    content: "\e9c9";
+}
+
+.motors-icons-grid:before {
+    content: "\e9ca";
+}
+
+.motors-icons-list:before {
+    content: "\e9cb";
+}
+
+.motors-icons-author:before {
+    content: "\e9cc";
+}
+
+.motors-icons-date:before {
+    content: "\e9cd";
+}
+
+.motors-icons-quotes3:before {
+    content: "\e9ce";
+}
+
+.motors-icons-time1:before {
+    content: "\e9cf";
+}
+
+.motors-icons-buoy-2:before {
+    content: "\e9d0";
+}
+
+.motors-icons-buoy:before {
+    content: "\e9d1";
+}
+
+.motors-icons-car-relic:before {
+    content: "\e9d2";
+}
+
+.motors-icons-star1:before {
+    content: "\e9d3";
+}
+
+.motors-icons-barrette:before {
+    content: "\e9d4";
+}
+
+.motors-icons-ico_mag_reviews:before {
+    content: "\e9d5";
+}
+
+.motors-icons-ico_mag_calendar:before {
+    content: "\e9d6";
+}
+
+.motors-icons-ico_mag_clock:before {
+    content: "\e9d7";
+}
+
+.motors-icons-ico_mag_eye:before {
+    content: "\e9d8";
+}
+
+.motors-icons-ico_mag_map_pin:before {
+    content: "\e9d9";
+}
+
+.motors-icons-ac-brochure1:before {
+    content: "\e9da";
+}
+
+.motors-icons-ac-max-passenger:before {
+    content: "\e9db";
+}
+
+.motors-icons-ac-max-range:before {
+    content: "\e9dc";
+}
+
+.motors-icons-ac-max-speed:before {
+    content: "\e9dd";
+}
+
+.motors-icons-ac-message1:before {
+    content: "\e9de";
+}
+
+.motors-icons-ac-offer-price1:before {
+    content: "\e9df";
+}
+
+.motors-icons-ac-phone1:before {
+    content: "\e9e0";
+}
+
+.motors-icons-ac-trade-in1:before {
+    content: "\e9e1";
+}
+
+.motors-icons-ac-useful-load:before {
+    content: "\e9e2";
+}
+
+.motors-icons-search-items:before {
+    content: "\e9e3";
+}
+
+.motors-icons-location-pin:before {
+    content: "\e9e4";
+}
+
+.motors-icons-search-list:before {
+    content: "\e9e5";
+}
+
+.motors-icons-ac-paper-pen:before {
+    content: "\e994";
+}
+
+.motors-icons-arrow-left1:before {
+    content: "\e999";
+}
+
+.motors-icons-arrow-right2:before {
+    content: "\e997";
+}
+
+.motors-icons-ac-brochure:before {
+    content: "\e900";
+}
+
+.motors-icons-ac-compare:before {
+    content: "\e992";
+}
+
+.motors-icons-ac-message:before {
+    content: "\e905";
+}
+
+.motors-icons-ac-offer-price:before {
+    content: "\e906";
+}
+
+.motors-icons-ac-phone:before {
+    content: "\e907";
+}
+
+.motors-icons-ac-share:before {
+    content: "\e995";
+}
+
+.motors-icons-ac-trade-in:before {
+    content: "\e909";
+}
+
+.motors-icons-cart:before {
+    content: "\e901";
+}
+
+.motors-icons-phone:before {
+    content: "\e908";
+}
+
+.motors-icons-time:before {
+    content: "\e90a";
+}
+
+.motors-icons-like-act:before {
+    content: "\e910";
+}
+
+.motors-icons-arrow-right:before {
+    content: "\e90f";
+}
+
+.motors-icons-star-empty:before {
+    content: "\e90e";
+}
+
+.motors-icons-car:before {
+    content: "\e90d";
+}
+
+.motors-icons-arrow:before {
+    content: "\e90c";
+}
+
+.motors-icons-note:before {
+    content: "\e90b";
+}
+
+.motors-icons-login:before {
+    content: "\e911";
+}
+
+.motors-icons-add-to-cart:before {
+    content: "\e902";
+}
+
+.motors-icons-compare:before {
+    content: "\e903";
+}
+
+.motors-icons-fire:before {
+    content: "\e904";
+}
+
+.motors-icons-latter:before {
+    content: "\e912";
+}
+
+.motors-icons-like:before {
+    content: "\e913";
+}
+
+.motors-icons-quote:before {
+    content: "\e914";
+}
+
+.motors-icons-star:before {
+    content: "\e915";
+}
+
+.motors-icons-depth-sounder-installation:before {
+    content: "\e933";
+}
+
+.motors-icons-engine-repairs:before {
+    content: "\e934";
+}
+
+.motors-icons-fuel-changes:before {
+    content: "\e935";
+}
+
+.motors-icons-marine-engine-service:before {
+    content: "\e936";
+}
+
+.motors-icons-narrow-boat-painting:before {
+    content: "\e937";
+}
+
+.motors-icons-accident:before {
+    content: "\e930";
+}
+
+.motors-icons-exterior:before {
+    content: "\e931";
+}
+
+.motors-icons-interior:before {
+    content: "\e932";
+}
+
+.motors-icons-calculator-boat:before {
+    content: "\e92f";
+}
+
+.motors-icons-quote_2:before {
+    content: "\e92e";
+}
+
+.motors-icons-check:before {
+    content: "\e92d";
+}
+
+.motors-icons-calendar:before {
+    content: "\e925";
+}
+
+.motors-icons-dimensions:before {
+    content: "\e926";
+}
+
+.motors-icons-fan:before {
+    content: "\e927";
+}
+
+.motors-icons-message:before {
+    content: "\e928";
+}
+
+.motors-icons-performance:before {
+    content: "\e929";
+}
+
+.motors-icons-phone1:before {
+    content: "\e92a";
+}
+
+.motors-icons-skype:before {
+    content: "\e92b";
+}
+
+.motors-icons-tank:before {
+    content: "\e92c";
+}
+
+.motors-icons-pin:before {
+    content: "\e924";
+}
+
+.motors-icons-add-to-compare:before {
+    content: "\e920";
+}
+
+.motors-icons-camera:before {
+    content: "\e921";
+}
+
+.motors-icons-remove-from-compare:before {
+    content: "\e922";
+}
+
+.motors-icons-movie:before {
+    content: "\e923";
+}
+
+.motors-icons-arrow-left:before {
+    content: "\e91e";
+}
+
+.motors-icons-arrow-right1:before {
+    content: "\e91f";
+}
+
+.motors-icons-cart1:before {
+    content: "\e91d";
+}
+
+.motors-icons-quote1:before {
+    content: "\e91c";
+}
+
+.motors-icons-wave:before {
+    content: "\e916";
+}
+
+.motors-icons-jet-sky .path1:before {
+    content: "\e917";
+    color: rgb(45, 163, 198);
+}
+
+.motors-icons-jet-sky .path2:before {
+    content: "\e9e6";
+    margin-left: -3em;
+    color: rgb(34, 45, 100);
+}
+
+.motors-icons-canoe .path1:before {
+    content: "\e918";
+    color: rgb(45, 163, 198);
+}
+
+.motors-icons-canoe .path2:before {
+    content: "\e9e7";
+    margin-left: -2.7099609375em;
+    color: rgb(34, 45, 100);
+}
+
+.motors-icons-dinghy .path1:before {
+    content: "\e919";
+    color: rgb(45, 163, 198);
+}
+
+.motors-icons-dinghy .path2:before {
+    content: "\e9e8";
+    margin-left: -3.111328125em;
+    color: rgb(34, 45, 100);
+}
+
+.motors-icons-yacht .path1:before {
+    content: "\e91a";
+    color: rgb(45, 163, 198);
+}
+
+.motors-icons-yacht .path2:before {
+    content: "\e9e9";
+    margin-left: -2.7099609375em;
+    color: rgb(34, 45, 100);
+}
+
+.motors-icons-sailboat .path1:before {
+    content: "\e91b";
+    color: rgb(45, 163, 198);
+}
+
+.motors-icons-sailboat .path2:before {
+    content: "\e9ea";
+    margin-left: -1.3330078125em;
+    color: rgb(34, 45, 100);
+}
+
+.motors-icons-boat .path1:before {
+    content: "\e938";
+    color: rgb(34, 45, 100);
+}
+
+.motors-icons-boat .path2:before {
+    content: "\e9eb";
+    margin-left: -2.3330078125em;
+    color: rgb(45, 163, 198);
+}
+
+.motors-icons-financing:before {
+    content: "\e939";
+}
+
+.motors-icons-s_ship:before {
+    content: "\e93a";
+}
+
+.motors-icons-binoculars:before {
+    content: "\e93b";
+}
+
+.motors-icons-helm:before {
+    content: "\e93c";
+}
+
+.motors-icons-shellfish:before {
+    content: "\e93d";
+}
+
+.motors-icons-crew:before {
+    content: "\e93e";
+}
+
+.motors-icons-shackle:before {
+    content: "\e93f";
+}
+
+.motors-icons-compass:before {
+    content: "\e940";
+}
+
+.motors-icons-anchor:before {
+    content: "\e941";
+}
+
+.motors-icons-hat:before {
+    content: "\e942";
+}
+
+.motors-icons-sail:before {
+    content: "\e943";
+}
+
+.motors-icons-fuel:before {
+    content: "\e944";
+}
+
+.motors-icons-size:before {
+    content: "\e945";
+}
+
+.motors-icons-compare-boats:before {
+    content: "\e946";
+}
+
+.motors-icons-cap-hat:before {
+    content: "\e947";
+}
+
+.motors-icons-add_car:before {
+    content: "\e948";
+}
+
+.motors-icons-standart:before {
+    content: "\e949";
+}
+
+.motors-icons-video:before {
+    content: "\e94a";
+}
+
+.motors-icons-motorcycle:before {
+    content: "\e94b";
+}
+
+.motors-icons-angle-round:before {
+    content: "\e94c";
+}
+
+.motors-icons-phone-round:before {
+    content: "\e94d";
+}
+
+.motors-icons-cash:before {
+    content: "\e94e";
+}
+
+.motors-icons-chat:before {
+    content: "\e94f";
+}
+
+.motors-icons-helm1:before {
+    content: "\e950";
+}
+
+.motors-icons-phone-chat:before {
+    content: "\e951";
+}
+
+.motors-icons-report:before {
+    content: "\e952";
+}
+
+.motors-icons-share:before {
+    content: "\e953";
+}
+
+.motors-icons-trade:before {
+    content: "\e954";
+}
+
+.motors-icons-bag:before {
+    content: "\e955";
+}
+
+.motors-icons-chair_rent:before {
+    content: "\e956";
+}
+
+.motors-icons-gps_rent:before {
+    content: "\e957";
+}
+
+.motors-icons-medal_rent:before {
+    content: "\e958";
+}
+
+.motors-icons-phone_circle:before {
+    content: "\e959";
+}
+
+.motors-icons-seats:before {
+    content: "\e95a";
+}
+
+.motors-icons-support_rent:before {
+    content: "\e95b";
+}
+
+.motors-icons-thumbs_rent:before {
+    content: "\e95c";
+}
+
+.motors-icons-baloon_tail:before {
+    content: "\e95d";
+}
+
+.motors-icons-ac:before {
+    content: "\e95e";
+}
+
+.motors-icons-door:before {
+    content: "\e95f";
+}
+
+.motors-icons-redo:before {
+    content: "\e960";
+}
+
+.motors-icons-ico-close:before {
+    content: "\e961";
+}
+
+.motors-icons-payment_listing:before {
+    content: "\e962";
+}
+
+.motors-icons-shield-o:before {
+    content: "\e963";
+}
+
+.motors-icons-reviews:before {
+    content: "\e964";
+}
+
+.motors-icons-two_users:before {
+    content: "\e965";
+}
+
+.motors-icons-car-listing:before {
+    content: "\e966";
+}
+
+.motors-icons-pin_big:before {
+    content: "\e967";
+}
+
+.motors-icons-write-review:before {
+    content: "\e968";
+}
+
+.motors-icons-sales_phone:before {
+    content: "\e969";
+}
+
+.motors-icons-sales_hours:before {
+    content: "\e96a";
+}
+
+.motors-icons-photos:before {
+    content: "\e96b";
+}
+
+.motors-icons-add_check:before {
+    content: "\e96c";
+}
+
+.motors-icons-star-o:before {
+    content: "\e96d";
+}
+
+.motors-icons-inventory:before {
+    content: "\e96e";
+}
+
+.motors-icons-write_message:before {
+    content: "\e96f";
+}
+
+.motors-icons-hashtag:before {
+    content: "\e970";
+}
+
+.motors-icons-mail-o:before {
+    content: "\e971";
+}
+
+.motors-icons-user-2:before {
+    content: "\e972";
+}
+
+.motors-icons-pin_2:before {
+    content: "\e973";
+}
+
+.motors-icons-phone_2:before {
+    content: "\e974";
+}
+
+.motors-icons-vin_check:before {
+    content: "\e975";
+}
+
+.motors-icons-color_type:before {
+    content: "\e976";
+}
+
+.motors-icons-body_type:before {
+    content: "\e977";
+}
+
+.motors-icons-pin1:before {
+    content: "\e978";
+}
+
+.motors-icons-mail:before {
+    content: "\e979";
+}
+
+.motors-icons-phone2:before {
+    content: "\e97a";
+}
+
+.motors-icons-compare-new:before {
+    content: "\e97b";
+}
+
+.motors-icons-staricon:before {
+    content: "\e97c";
+}
+
+.motors-icons-photo:before {
+    content: "\e97d";
+}
+
+.motors-icons-cog:before {
+    content: "\e97e";
+}
+
+.motors-icons-listing-compare:before {
+    content: "\e97f";
+}
+
+.motors-icons-user:before {
+    content: "\e980";
+}
+
+.motors-icons-listing_car_plus:before {
+    content: "\e981";
+}
+
+.motors-icons-cash_dollar:before {
+    content: "\e982";
+}
+
+.motors-icons-like_it:before {
+    content: "\e983";
+}
+
+.motors-icons-shield_check:before {
+    content: "\e984";
+}
+
+.motors-icons-award_blank:before {
+    content: "\e985";
+}
+
+.motors-icons-diagnostic_monitor:before {
+    content: "\e986";
+}
+
+.motors-icons-calendar_service:before {
+    content: "\e987";
+}
+
+.motors-icons-appointment_calendar:before {
+    content: "\e988";
+}
+
+@font-face {
+    font-family: "stm-service-default";
+  src: url("../../fonts/service-fonts/stm-service-default1e23.eot?ok2lqi");
+  src: url("../../fonts/service-fonts/stm-service-default1e23.eot?ok2lqi#iefix") format("embedded-opentype"), url("../../fonts/service-fonts/stm-service-default1e23.ttf?ok2lqi") format("truetype"), url("../../fonts/service-fonts/stm-service-default1e23.woff?ok2lqi") format("woff"), url("../../fonts/service-fonts/stm-service-default1e23.svg?ok2lqi#stm-service-default") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^=stm-service-icon-]::before,
+[class*=" stm-service-icon-"]::before {
+  /* use !important to prevent issues with browser extensions that change fonts */
+    font-family: "stm-service-default" !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+  /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.stm-service-icon-payment_listing:before {
+    content: "\e91f";
+}
+
+.stm-service-icon-shield-o:before {
+    content: "\e923";
+}
+
+.stm-service-icon-reviews:before {
+    content: "\e924";
+}
+
+.stm-service-icon-two_users:before {
+    content: "\e925";
+}
+
+.stm-service-icon-car-listing:before {
+    content: "\e926";
+}
+
+.stm-service-icon-pin_big:before {
+    content: "\e922";
+}
+
+.stm-service-icon-write-review:before {
+    content: "\e91e";
+}
+
+.stm-service-icon-sales_phone:before {
+    content: "\e920";
+    color: inherit;
+}
+
+.stm-service-icon-sales_hours:before {
+    content: "\e921";
+    color: inherit;
+}
+
+.stm-service-icon-photos:before {
+    content: "\e91c";
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.stm-service-icon-add_check:before {
+    content: "\e91d";
+}
+
+.stm-service-icon-star-o:before {
+    content: "\e91a";
+    color: #4e90cc;
+}
+
+.stm-service-icon-inventory:before {
+    content: "\e91b";
+    color: #4e90cc;
+}
+
+.stm-service-icon-write_message:before {
+    content: "\e919";
+    color: #aaa;
+}
+
+.stm-service-icon-hashtag:before {
+    content: "\e918";
+}
+
+.stm-service-icon-mail-o:before {
+    content: "\e916";
+    color: #aaa;
+}
+
+.stm-service-icon-user-2:before {
+    content: "\e917";
+    color: #aaa;
+}
+
+.stm-service-icon-pin_2:before {
+    content: "\e914";
+    color: inherit;
+}
+
+.stm-service-icon-phone_2:before {
+    content: "\e915";
+    color: inherit;
+}
+
+.stm-service-icon-vin_check:before {
+    content: "\e911";
+}
+
+.stm-service-icon-color_type:before {
+    content: "\e912";
+}
+
+.stm-service-icon-body_type:before {
+    content: "\e913";
+}
+
+.stm-service-icon-pin:before {
+    content: "\e910";
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.stm-service-icon-mail:before {
+    content: "\e90e";
+    color: #888;
+}
+
+.stm-service-icon-phone:before {
+    content: "\e90f";
+    color: inherit;
+}
+
+.stm-service-icon-compare-new:before {
+    content: "\e90b";
+}
+
+.stm-service-icon-staricon:before {
+    content: "\e90c";
+}
+
+.stm-service-icon-photo:before {
+    content: "\e90d";
+}
+
+.stm-service-icon-cog:before {
+    content: "\e90a";
+}
+
+.stm-service-icon-listing-compare:before {
+    content: "\e909";
+}
+
+.stm-service-icon-user:before {
+    content: "\e908";
+    color: #5b6771;
+}
+
+.stm-service-icon-listing_car_plus:before {
+    content: "\e907";
+    color: inherit;
+}
+
+.stm-service-icon-cash_dollar:before {
+    content: "\e900";
+    color: inherit;
+}
+
+.stm-service-icon-like_it:before {
+    content: "\e901";
+    color: #2e84cc;
+}
+
+.stm-service-icon-shield_check:before {
+    content: "\e902";
+    color: #cc6119;
+}
+
+.stm-service-icon-award_blank:before {
+    content: "\e903";
+    color: #12b1c4;
+}
+
+.stm-service-icon-diagnostic_monitor:before {
+    content: "\e904";
+    color: #dd276c;
+}
+
+.stm-service-icon-calendar_service:before {
+    content: "\e905";
+    color: #df8821;
+}
+
+.stm-service-icon-appointment_calendar:before {
+    content: "\e906";
+}
+
+@font-face {
+    font-family: "stm-icon";
+  src: url("../../fonts/default-icon-font/stm-icon7c4b.eot?2bstzn");
+  src: url("../../fonts/default-icon-font/stm-icon7c4b.eot?2bstzn#iefix") format("embedded-opentype"), url("../../fonts/default-icon-font/stm-icon7c4b.ttf?2bstzn") format("truetype"), url("../../fonts/default-icon-font/stm-icon7c4b.woff?2bstzn") format("woff"), url("../../fonts/default-icon-font/stm-icon7c4b.svg?2bstzn#stm-icon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^=stm-icon-],
+[class*=" stm-icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+}
+
+[class^=stm-icon-]:before,
+[class*=" stm-icon-"]:before {
+    font-family: "stm-icon";
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+  /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.stm-icon-phone-o:before {
+    content: "\e954";
+}
+
+.stm-icon-whatsapp:before {
+    content: "\e953";
+    color: #45c655;
+}
+
+.stm-icon-album:before {
+    content: "\e952";
+}
+
+.stm-icon-steering-wheel-thin:before {
+    content: "\e950";
+}
+
+.stm-icon-pin-o:before {
+    content: "\e951";
+}
+
+.stm-icon-hexagon-fill:before {
+    content: "\e94f";
+}
+
+.stm-icon-battery:before {
+    content: "\e938";
+}
+
+.stm-icon-brochures:before {
+    content: "\e939";
+}
+
+.stm-icon-charge-bolt:before {
+    content: "\e93a";
+}
+
+.stm-icon-checked:before {
+    content: "\e93b";
+}
+
+.stm-icon-twisted-plug:before {
+    content: "\e93c";
+}
+
+.stm-icon-light-envelope:before {
+    content: "\e93d";
+}
+
+.stm-icon-location-flag:before {
+    content: "\e93e";
+}
+
+.stm-icon-speedometr-advance:before {
+    content: "\e93f";
+}
+
+.stm-icon-no-oil-sign:before {
+    content: "\e940";
+}
+
+.stm-icon-charging-cost:before {
+    content: "\e941";
+}
+
+.stm-icon-hexagon-right:before {
+    content: "\e942";
+}
+
+.stm-icon-hexagon-left:before {
+    content: "\e943";
+}
+
+.stm-icon-light-circle-check:before {
+    content: "\e944";
+}
+
+.stm-icon-light-zoom-in:before {
+    content: "\e945";
+}
+
+.stm-icon-close-times:before {
+    content: "\e946";
+}
+
+.stm-icon-leaf:before {
+    content: "\e947";
+}
+
+.stm-icon-percentage:before {
+    content: "\e948";
+}
+
+.stm-icon-share-social:before {
+    content: "\e949";
+}
+
+.stm-icon-shopping-cart-1:before {
+    content: "\e94a";
+}
+
+.stm-icon-speedometer-circular-tool:before {
+    content: "\e94b";
+}
+
+.stm-icon-telephone:before {
+    content: "\e94c";
+}
+
+.stm-icon-electric-engine:before {
+    content: "\e94d";
+}
+
+.stm-icon-car-spin:before {
+    content: "\e94e";
+}
+
+.stm-icon-speedometr2:before {
+    content: "\e800";
+}
+
+.stm-icon-shop_bag:before {
+    content: "\e801";
+}
+
+.stm-icon-chat2:before {
+    content: "\e802";
+}
+
+.stm-icon-car:before {
+    content: "\e803";
+}
+
+.stm-icon-car_search:before {
+    content: "\e804";
+}
+
+.stm-icon-label:before {
+    content: "\e805";
+}
+
+.stm-icon-speedometr:before {
+    content: "\e806";
+}
+
+.stm-icon-chat:before {
+    content: "\e807";
+}
+
+.stm-icon-application:before {
+    content: "\e808";
+}
+
+.stm-icon-message:before {
+    content: "\e809";
+}
+
+.stm-icon-car_sale:before {
+    content: "\e80a";
+}
+
+.stm-icon-phone:before {
+    content: "\e80b";
+}
+
+.stm-icon-label-reverse:before {
+    content: "\e80c";
+}
+
+.stm-icon-transmission:before {
+    content: "\e80d";
+}
+
+.stm-icon-fuel:before {
+    content: "\e80e";
+}
+
+.stm-icon-road:before {
+    content: "\e80f";
+}
+
+.stm-icon-search:before {
+    content: "\e810";
+}
+
+.stm-icon-search-items:before {
+    content: "\e955";
+}
+
+.stm-icon-location-pin:before {
+    content: "\e956";
+}
+
+.stm-icon-search-list:before {
+    content: "\e957";
+}
+
+.stm-icon-reset:before {
+    content: "\e811";
+}
+
+.stm-icon-phone2:before {
+    content: "\e812";
+}
+
+.stm-icon-question:before {
+    content: "\e813";
+}
+
+.stm-icon-steering_wheel:before {
+    content: "\e814";
+}
+
+.stm-icon-gear:before {
+    content: "\e901";
+}
+
+.stm-icon-key:before {
+    content: "\e908";
+}
+
+.stm-icon-calendar:before {
+    content: "\e90b";
+}
+
+.stm-icon-oil:before {
+    content: "\e90c";
+}
+
+.stm-icon-diagnostic:before {
+    content: "\e90d";
+}
+
+.stm-icon-Tire_Wheel_Service2:before {
+    content: "\e90e";
+}
+
+.stm-icon-Tire_Wheel_Service:before {
+    content: "\e90f";
+}
+
+.stm-icon-auto_loan:before {
+    content: "\e910";
+}
+
+.stm-icon-engine:before {
+    content: "\e911";
+}
+
+.stm-icon-speedometr3:before {
+    content: "\e912";
+}
+
+.stm-icon-transmission2:before {
+    content: "\e913";
+}
+
+.stm-icon-mail:before {
+    content: "\e914";
+}
+
+.stm-icon-pin:before {
+    content: "\e915";
+}
+
+.stm-icon-delete:before {
+    content: "\e916";
+}
+
+.stm-icon-share:before {
+    content: "\e917";
+}
+
+.stm-icon-calculator:before {
+    content: "\e918";
+}
+
+.stm-icon-added:before {
+    content: "\e919";
+}
+
+.stm-icon-brochure:before {
+    content: "\e91a";
+}
+
+.stm-icon-add:before {
+    content: "\e91b";
+}
+
+.stm-icon-remove:before {
+    content: "\e91c";
+}
+
+.stm-icon-add_car:before {
+    content: "\e91d";
+}
+
+.stm-icon-air_conditioning:before {
+    content: "\e91e";
+}
+
+.stm-icon-auto_electric:before {
+    content: "\e91f";
+}
+
+.stm-icon-brake:before {
+    content: "\e920";
+}
+
+.stm-icon-oil-add:before {
+    content: "\e921";
+}
+
+.stm-icon-Tire_Wheel:before {
+    content: "\e922";
+}
+
+.stm-icon-load2:before {
+    content: "\e923";
+}
+
+.stm-icon-load1:before {
+    content: "\e924";
+}
+
+.stm-icon-transmission_fill:before {
+    content: "\e925";
+}
+
+.stm-icon-drive_2:before {
+    content: "\e926";
+}
+
+.stm-icon-engine_fill:before {
+    content: "\e927";
+}
+
+.stm-icon-grid:before {
+    content: "\e928";
+}
+
+.stm-icon-list:before {
+    content: "\e929";
+}
+
+.stm-icon-author:before {
+    content: "\e92a";
+}
+
+.stm-icon-date:before {
+    content: "\e92b";
+}
+
+.stm-icon-quotes3:before {
+    content: "\e92c";
+}
+
+.stm-icon-time:before {
+    content: "\e92d";
+}
+
+.stm-icon-buoy-2:before {
+    content: "\e92e";
+}
+
+.stm-icon-buoy:before {
+    content: "\e92f";
+}
+
+.stm-icon-car-relic:before {
+    content: "\e930";
+}
+
+.stm-icon-star:before {
+    content: "\e931";
+}
+
+.stm-icon-barrette:before {
+    content: "\e932";
+}
+
+.stm-icon-ico_mag_reviews:before {
+    content: "\e933";
+}
+
+.stm-icon-ico_mag_calendar:before {
+    content: "\e934";
+}
+
+.stm-icon-ico_mag_clock:before {
+    content: "\e935";
+}
+
+.stm-icon-ico_mag_eye:before {
+    content: "\e936";
+}
+
+.stm-icon-ico_mag_map_pin:before {
+    content: "\e937";
+}
+
+.stm-icon-ac-brochure:before {
+    content: "\e900";
+}
+
+.stm-icon-ac-max-passenger:before {
+    content: "\e902";
+}
+
+.stm-icon-ac-max-range:before {
+    content: "\e903";
+}
+
+.stm-icon-ac-max-speed:before {
+    content: "\e904";
+}
+
+.stm-icon-ac-message:before {
+    content: "\e905";
+}
+
+.stm-icon-ac-offer-price:before {
+    content: "\e906";
+}
+
+.stm-icon-ac-phone:before {
+    content: "\e907";
+}
+
+.stm-icon-ac-trade-in:before {
+    content: "\e909";
+}
+
+.stm-icon-ac-useful-load:before {
+    content: "\e90a";
+}

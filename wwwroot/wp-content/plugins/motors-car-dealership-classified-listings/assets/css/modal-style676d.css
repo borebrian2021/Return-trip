@@ -1,0 +1,568 @@
+/*Default*/
+.stm-orange {
+    color: #ffb129;
+}
+
+#get-car-price-form,
+#request-trade-offer-form,
+#request-test-drive-form {
+    position: absolute;
+    max-width: 100%;
+    width: 580px;
+    left: 50%;
+    top: 50%;
+    z-index: 9999;
+    transform: translateY(-50%) translateX(-50%);
+}
+
+#get-car-price-form .form-error,
+#request-trade-offer-form .form-error,
+#request-test-drive-form .form-error {
+    border: 1px solid var(--motors-error-text-color, #ff2325) !important;
+}
+
+#get-car-price-form .modal-dialog,
+#request-trade-offer-form .modal-dialog,
+#request-test-drive-form .modal-dialog {
+    max-width: 100%;
+}
+
+#get-car-price-form .modal-body,
+#request-trade-offer-form .modal-body,
+#request-test-drive-form .modal-body {
+    padding: 44px 37px 34px;
+}
+
+#get-car-price-form .modal-body .alert,
+#request-trade-offer-form .modal-body .alert,
+#request-test-drive-form .modal-body .alert {
+    margin-top: 15px;
+    padding: 5px 10px;
+}
+
+#get-car-price-form .modal-body .button-row .col-md-4,
+#request-trade-offer-form .modal-body .button-row .col-md-4,
+#request-test-drive-form .modal-body .button-row .col-md-4 {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#get-car-price-form .modal-body .button-row .col-md-4 .stm-ajax-loader,
+#request-trade-offer-form .modal-body .button-row .col-md-4 .stm-ajax-loader,
+#request-test-drive-form .modal-body .button-row .col-md-4 .stm-ajax-loader {
+    margin-left: 10px;
+}
+
+#get-car-price-form .modal-body .form-group,
+#request-trade-offer-form .modal-body .form-group,
+#request-test-drive-form .modal-body .form-group {
+    margin-bottom: 17px;
+}
+
+#get-car-price-form .modal-body .form-group input[type=text], #get-car-price-form .modal-body .form-group input[type=number], #get-car-price-form .modal-body .form-group input[type=tel], #get-car-price-form .modal-body .form-group input[type=email], #get-car-price-form .modal-body .form-group input[type=search], #get-car-price-form .modal-body .form-group input[type=password],
+#request-trade-offer-form .modal-body .form-group input[type=text],
+#request-trade-offer-form .modal-body .form-group input[type=number],
+#request-trade-offer-form .modal-body .form-group input[type=tel],
+#request-trade-offer-form .modal-body .form-group input[type=email],
+#request-trade-offer-form .modal-body .form-group input[type=search],
+#request-trade-offer-form .modal-body .form-group input[type=password],
+#request-test-drive-form .modal-body .form-group input[type=text],
+#request-test-drive-form .modal-body .form-group input[type=number],
+#request-test-drive-form .modal-body .form-group input[type=tel],
+#request-test-drive-form .modal-body .form-group input[type=email],
+#request-test-drive-form .modal-body .form-group input[type=search],
+#request-test-drive-form .modal-body .form-group input[type=password] {
+    display: block;
+    width: 100%;
+    height: 37px;
+    line-height: 37px;
+    padding: 0 21px;
+    font-weight: 400;
+    color: var(--motors-text-alpha-color, #888888);
+    border: 2px solid var(--motors-filter-inputs-color, #eceff3);
+    font-size: 14px;
+    outline: none !important;
+    background-color: var(--motors-filter-inputs-color, #eceff3);
+}
+
+#get-car-price-form .stm-loader.circle,
+#request-trade-offer-form .stm-loader.circle,
+#request-test-drive-form .stm-loader.circle {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+#get-car-price-form .stm-loader.circle div,
+#request-trade-offer-form .stm-loader.circle div,
+#request-test-drive-form .stm-loader.circle div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 5px solid var(--motors-filter-inputs-color, #eceff3);
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+#get-car-price-form .stm-loader-inner,
+#request-trade-offer-form .stm-loader-inner,
+#request-test-drive-form .stm-loader-inner {
+    display: none;
+}
+
+#get-car-price-form .stm-sell-a-car-loader.active .stm-loader-inner,
+#request-trade-offer-form .stm-sell-a-car-loader.active .stm-loader-inner,
+#request-test-drive-form .stm-sell-a-car-loader.active .stm-loader-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.modal-backdrop.fade {
+    filter: alpha(opacity=0);
+    opacity: 0;
+}
+
+.modal-backdrop.in, .modal-backdrop.show {
+    filter: alpha(opacity=50);
+    opacity: 0.5;
+}
+
+.modal .modal-header {
+    border-bottom: none;
+}
+
+.modal .modal-header .modal-close {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    font-size: 16px;
+    display: block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    color: var(--motors-contrast-text-color, #333333);
+    left: auto;
+    cursor: pointer;
+    transition: 0.1s;
+}
+
+.modal .modal-header .modal-close:hover {
+    color: var(--motors-accent-color, #333333);
+}
+
+.modal-header-iconed {
+    padding: 28px 37px 23px 105px !important;
+    position: relative;
+    background-color: var(--motors-bg-contrast, #232628);
+    display: block;
+}
+
+.modal-header-iconed h3 {
+    text-transform: uppercase;
+    color: var(--motors-contrast-text-color, #ffffff);
+}
+
+.modal-header-iconed .test-drive-car-name {
+    margin-top: -5px;
+    color: var(--motors-text-alpha-color, #aaaaaa);
+}
+
+.modal-header-iconed i {
+    position: absolute;
+    top: 35px;
+    left: 32px;
+    font-size: 47px;
+    color: var(--motors-accent-color, #6c98e1);
+}
+
+.stm-ajax-loader {
+    display: none;
+    font-size: 14px;
+}
+
+.stm-ajax-loader.loading {
+    display: inline-block;
+    animation: rotating 2s infinite linear;
+}
+
+.single-add-to-compare {
+    position: fixed;
+    top: -30%;
+    left: 0;
+    right: 0;
+    padding-top: 17px;
+    min-height: 71px;
+    background-color: var(--motors-accent-color, #6c98e1);
+    z-index: 99999;
+    opacity: 0;
+}
+
+.single-add-to-compare.danger, .single-add-to-compare.overadded {
+    background-color: var(--motors-error-bg-color, #ff0000);
+}
+
+.single-add-to-compare.danger .compare-fixed-link:hover, .single-add-to-compare.overadded .compare-fixed-link:hover {
+    color: var(--motors-error-text-color, #ff0000);
+}
+
+.single-add-to-compare.warning {
+    background-color: var(--motors-notice-color, #cc6119);
+}
+
+.single-add-to-compare.warning .compare-fixed-link:hover {
+    color: var(--motors-accent-color, #cc6119);
+}
+
+.single-add-to-compare.single-add-to-compare-visible {
+    top: 0;
+    opacity: 1;
+    z-index: 99999;
+}
+
+.single-add-to-compare.single-add-to-compare-visible.danger {
+    background-color: var(--motors-error-text-color, #eb232c);
+}
+
+.single-add-to-compare.single-add-to-compare-visible.warning {
+    background-color: var(--motors-notice-text-color, #8a6d3b);
+}
+
+.single-add-to-compare .compare-fixed-link {
+    display: block;
+    padding: 8px 23px 6px;
+    color: var(--motors-contrast-text-color, #ffffff);
+    border: 1px solid var(--motors-contrast-text-color, #ffffff);
+    border-radius: 3px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 400;
+    text-decoration: none !important;
+    text-align: center;
+    max-width: -moz-fit-content;
+    max-width: fit-content;
+}
+
+.single-add-to-compare .compare-fixed-link:hover {
+    background-color: var(--motors-bg-color, #ffffff);
+    color: var(--motors-accent-color, #6c98e1);
+}
+
+@media (max-width: 767px) {
+    .single-add-to-compare .compare-fixed-link {
+        margin: 0 0 10px !important;
+        float: none !important;
+    }
+}
+
+.single-add-to-compare .single-add-to-compare-left {
+    position: relative;
+    padding-left: 55px;
+    min-height: 35px;
+}
+
+.single-add-to-compare .single-add-to-compare-left .add-to-compare-icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    color: var(--motors-contrast-text-color, #ffffff);
+    font-size: 35px;
+    transform: translateY(-50%);
+}
+
+.single-add-to-compare .single-add-to-compare-left .add-to-compare-icon:before {
+    content: "\f071";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 600;
+    font-style: normal;
+    font-size: inherit;
+    text-rendering: auto;
+    transform: translate(0, 0);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.single-add-to-compare .single-add-to-compare-left .stm-title {
+    display: block;
+    padding-top: 10px;
+    color: var(--motors-contrast-text-color, #ffffff);
+    font-weight: 400;
+    font-size: 14px;
+}
+
+@media (max-width: 767px) {
+    .single-add-to-compare .single-add-to-compare-left {
+        padding-left: 0;
+    }
+
+    .single-add-to-compare .single-add-to-compare-left .add-to-compare-icon {
+        display: none;
+    }
+}
+
+.single-add-to-compare .pull-right {
+    float: right;
+}
+
+#request-trade-in-offer .form-error {
+    border: 1px solid var(--motors-error-text-color, #ff2325) !important;
+}
+
+#request-trade-in-offer .stm-label-type-2 {
+    margin-bottom: 5px;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--motors-text-color, #000000);
+}
+
+#request-trade-in-offer .stm-sell-a-car-form .form-navigation-unit .title {
+    color: var(--motors-text-color, #232628);
+}
+
+#request-trade-in-offer .pull-left {
+    float: left !important;
+}
+
+#request-trade-in-offer .wpcf7-response-output {
+    margin: 10px 0 0 !important;
+    padding: 15px !important;
+    border: 2px solid var(--motors-accent-color, #6c98e1) !important;
+    color: var(--motors-accent-color, #6c98e1) !important;
+    border-radius: 5px;
+}
+
+#request-trade-in-offer .wpcf7-response-output.wpcf7-validation-errors {
+    border-color: var(--motors-error-text-color, #ff2325);
+    color: var(--motors-error-text-color, #ff2325);
+}
+
+#request-trade-in-offer .wpcf7-response-output.wpcf7-mail-sent-ok {
+    border-color: var(--motors-success-text-color, #32cd32) !important;
+    color: var(--motors-success-text-color, #32cd32) !important;
+}
+
+#request-trade-in-offer .stm-loader.circle {
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+
+#request-trade-in-offer .stm-loader.circle div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 5px solid var(--motors-bg-shade, #eceff3);
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+#request-trade-in-offer .stm-loader-inner {
+    display: none;
+}
+
+#request-trade-in-offer .stm-sell-a-car-loader.active .stm-loader-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#trade-in .modal-dialog {
+    max-width: 900px;
+    width: 100%;
+}
+
+@media (max-width: 920px) {
+    #trade-in .modal-dialog {
+        width: auto;
+    }
+}
+
+#trade-in .modal-dialog .modal-body {
+    padding: 30px;
+}
+
+#trade-offer .modal-dialog,
+#test-drive .modal-dialog {
+    width: 600px;
+    margin: 30px auto;
+    max-width: 100%;
+}
+
+#trade-offer.show .modal-dialog,
+#test-drive.show .modal-dialog {
+    transform: translate(0, 0);
+}
+
+.form-modal-label {
+    margin-bottom: 3px;
+    font-size: 13px;
+    color: var(--motors-text-alpha-color, #888888);
+}
+
+#request-trade-offer-form,
+#get-car-price-form,
+#request-test-drive-form {
+    position: absolute;
+    max-width: 100%;
+    width: 580px;
+    left: 50%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    z-index: 9999;
+}
+
+#request-trade-offer-form .modal-body,
+#get-car-price-form .modal-body,
+#request-test-drive-form .modal-body {
+    padding: 44px 37px 15px;
+}
+
+#request-trade-offer-form .col-md-5, #request-trade-offer-form .col-md-4,
+#get-car-price-form .col-md-5,
+#get-car-price-form .col-md-4,
+#request-test-drive-form .col-md-5,
+#request-test-drive-form .col-md-4 {
+    text-align: right;
+}
+
+#request-trade-offer-form .col-md-5 button, #request-trade-offer-form .col-md-4 button,
+#get-car-price-form .col-md-5 button,
+#get-car-price-form .col-md-4 button,
+#request-test-drive-form .col-md-5 button,
+#request-test-drive-form .col-md-4 button {
+    max-width: 90%;
+}
+
+.stm-datepicker-input-icon {
+    position: relative;
+}
+
+.stm-datepicker-input-icon:after {
+    position: absolute;
+    display: block;
+    font: normal normal normal 14px/1 FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translate(0, -50%);
+    right: 18px;
+    top: 50%;
+    margin-top: unset;
+    color: var(--motors-accent-color, #6c98e1);
+    font-size: 16px;
+    content: "\f017";
+}
+
+.stm-request-test-drive {
+    display: block;
+    text-align: center;
+    padding: 17px 28px 15px;
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--motors-contrast-text-color, #fff) !important;
+    border-radius: 3px;
+    text-decoration: none !important;
+    outline: none !important;
+    visibility: visible;
+    border: none;
+    white-space: normal;
+    margin: 20px auto 3px;
+}
+
+.msg-body {
+    padding-top: 20px;
+}
+
+.msg-body .alert-modal {
+    padding: 9px 15px 8px;
+    margin-bottom: 0;
+}
+
+.modal-calculator {
+    position: absolute;
+    max-width: 580px;
+    width: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+}
+
+@media (max-width: 767px) {
+    .modal-header-iconed .test-drive-car-name {
+        margin: 0;
+        line-height: 20px;
+        padding-right: 10px;
+    }
+}
+
+@media (max-width: 767px) {
+    .modal-header-iconed .modal-title {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 767px) {
+    .modal-header-iconed i {
+        font-size: 35px;
+    }
+}
+
+.modal-header-iconed .mobile-close-modal {
+    display: none;
+}
+
+@media (max-width: 450px) {
+    .modal-header-iconed {
+        display: block;
+    }
+
+    .modal-header-iconed i {
+        top: 28px;
+    }
+
+    .modal-header-iconed .mobile-close-modal {
+        display: block;
+        width: 18px;
+        height: 18px;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+
+    .modal-header-iconed .mobile-close-modal i {
+        position: relative;
+        top: 0;
+        left: 0;
+        font-size: 16px;
+    }
+}

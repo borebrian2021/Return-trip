@@ -1,0 +1,36 @@
+@model Return_trip.Models.VehicleOwnerRegistrationViewModel
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Vehicle owner registration";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
+            <div class="wpb_text_column wpb_content_element rt-registration-intro"><div class="wpb_wrapper">
+                <p>Register your transport business to manage fleet operations and connect with goods owners seeking dependable return-trip capacity.</p>
+            </div></div>
+            <div class="stm_auto_loan_calculator wide-version">
+                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Vehicle Owner Registration</h3></div>
+                <form asp-action="RegisterVehicleOwner" method="post" class="rt-registration-form">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                    <div class="row">
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="FirstName"></label></div><input asp-for="FirstName" class="form-control" autocomplete="given-name" /><span asp-validation-for="FirstName"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="LastName"></label></div><input asp-for="LastName" class="form-control" autocomplete="family-name" /><span asp-validation-for="LastName"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="Email"></label></div><input asp-for="Email" class="form-control" type="email" autocomplete="email" /><span asp-validation-for="Email"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="Phone"></label></div><input asp-for="Phone" class="form-control" type="tel" autocomplete="tel" /><span asp-validation-for="Phone"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="Password"></label></div><input asp-for="Password" class="form-control" type="password" autocomplete="new-password" /><span asp-validation-for="Password"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="CompanyName"></label></div><input asp-for="CompanyName" class="form-control" autocomplete="organization" /><span asp-validation-for="CompanyName"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="BusinessRegistrationNumber"></label></div><input asp-for="BusinessRegistrationNumber" class="form-control" /><span asp-validation-for="BusinessRegistrationNumber"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="Location"></label></div><input asp-for="Location" class="form-control" autocomplete="address-level2" /><span asp-validation-for="Location"></span></div></div>
+                        <div class="col-md-12"><a asp-action="Register" class="button button-sm">Back</a><button type="submit" class="button button-sm">Create vehicle owner account</button></div>
+                    </div>
+                </form>
+            </div>
+        </div></div></div>
+        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
+            <div class="widget widget_pages"><div class="widget-title"><h6>Fleet registration</h6></div><p>Register the company details for the vehicle owner account. Drivers and company agents are associated with the fleet through its owner.</p></div>
+        </div></div></div>
+    </div>
+</div>

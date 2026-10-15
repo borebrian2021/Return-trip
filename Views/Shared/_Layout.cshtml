@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Return_trip</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (ViewData["LandingTheme"] != null)
+    {
+        <link rel="stylesheet" href="~/css/landing-template.css" asp-append-version="true" />
+    }
+    <link rel="stylesheet" href="~/Return_trip.styles.css" asp-append-version="true" />
+</head>
+<body>
+    @if (ViewData["JourneyLayout"] != null)
+    {
+        <header class="rt-topbar">
+            <button type="button" class="rt-menu-toggle" id="journeyMenuToggle" aria-label="Toggle navigation">☰</button>
+            <a class="rt-brand" asp-controller="Home" asp-action="Index">
+                <span class="rt-brand-mark">RT</span>
+                <span><strong>Return Trip</strong><small>Freight operations</small></span>
+            </a>
+            <div class="rt-topbar-divider"></div>
+            <div class="rt-topbar-context"><strong>Journey workspace</strong><span>Workflow simulation</span></div>
+            <div class="rt-topbar-actions"><span class="rt-demo-state"><i></i> Demo mode</span><button type="button" class="rt-reset-button" id="resetDemoTop">Reset demo</button><span class="rt-user-avatar">GO</span></div>
+        </header>
+        <div class="rt-shell">
+            <aside class="rt-sidebar" id="journeySidebar">
+                <div class="rt-sidebar-caption">WORKSPACE</div>
+                <button type="button" class="rt-nav-item active" data-dashboard-nav="post"><span class="rt-nav-icon">▦</span> Overview</button>
+                <div class="rt-sidebar-caption">CARGO OPERATIONS</div>
+                <button type="button" class="rt-nav-item" data-dashboard-nav="post"><span class="rt-nav-icon">＋</span> Post a cargo</button>
+                <button type="button" class="rt-nav-item" data-dashboard-nav="bid"><span class="rt-nav-icon">⇄</span> Truck availability <span class="rt-nav-count" id="sidebarTruckCount">—</span></button>
+                <button type="button" class="rt-nav-item" data-dashboard-nav="owner"><span class="rt-nav-icon">▤</span> Bid review <span class="rt-nav-count" id="sidebarBidCount">—</span></button>
+                <div class="rt-sidebar-caption">DELIVERY</div>
+                <button type="button" class="rt-nav-item" data-dashboard-nav="driver"><span class="rt-nav-icon">◉</span> Driver & receipt</button>
+                <button type="button" class="rt-nav-item" data-dashboard-nav="confirm"><span class="rt-nav-icon">✓</span> Agent confirmation</button>
+                <div class="rt-sidebar-bottom">
+                    <div class="rt-sidebar-tip"><span>i</span><div><strong>Journey guide</strong><small>Move through each stage to simulate a full shipment.</small></div></div>
+                    <div class="rt-sidebar-version">RETURN TRIP <span>·</span> WORKFLOW PREVIEW</div>
+                </div>
+            </aside>
+            <div class="rt-sidebar-overlay" id="journeySidebarOverlay"></div>
+            <div class="rt-main">
+                <div class="container-fluid app-container">
+                    <div class="pb-3">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @if (ViewData["LandingTheme"] != null)
+        {
+            <div class="lt-topline"><span>Return Trip connects goods owners with route-ready transport teams.</span><a href="#how-it-works">See how the journey works <b>→</b></a></div>
+        }
+        <header class="public-nav">
+            <div class="public-nav-inner">
+                <a class="public-brand" asp-area="" asp-controller="Home" asp-action="Index"><span class="rt-brand-mark">RT</span><span><strong>Return Trip</strong><small>Freight journeys, connected</small></span></a>
+                <nav class="public-nav-links" id="publicNavLinks" aria-label="Main navigation">
+                    <a asp-controller="Home" asp-action="Index" asp-fragment="top">Home</a>
+                    <a asp-controller="Home" asp-action="Index" asp-fragment="how-it-works">How it works</a>
+                    <a asp-controller="Home" asp-action="Index" asp-fragment="register">For participants</a>
+                    <a class="public-nav-preview" asp-controller="Home" asp-action="Journey">Journey preview</a>
+                </nav>
+                <button class="public-nav-toggle" id="publicNavToggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="publicNavLinks"><span></span><span></span><span></span></button>
+                <div class="public-nav-actions"><a class="public-nav-login" asp-controller="Home" asp-action="Login">Log in</a><a class="public-nav-register" asp-controller="Home" asp-action="Register">Register <span>→</span></a></div>
+            </div>
+        </header>
+        <main class="public-main" role="main">
+            @RenderBody()
+        </main>
+    }
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

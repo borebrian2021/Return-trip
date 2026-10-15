@@ -1,0 +1,33 @@
+@model Return_trip.Models.DriverProfileViewModel
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Add a driver";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
+            <div class="wpb_text_column wpb_content_element rt-registration-intro"><div class="wpb_wrapper">
+                <p>Enter the driver's official profile details. The driver will later enter their ID number to find this record and create their own email/password sign-in credentials.</p>
+            </div></div>
+            <div class="stm_auto_loan_calculator wide-version">
+                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Register Driver Details</h3></div>
+                <form asp-action="AddDriver" method="post" class="rt-registration-form">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                    <div class="row">
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="FullName"></label></div><input asp-for="FullName" class="form-control" autocomplete="name" /><span asp-validation-for="FullName"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="IdNumber"></label></div><input asp-for="IdNumber" class="form-control" autocomplete="off" /><span asp-validation-for="IdNumber"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="Email"></label></div><input asp-for="Email" class="form-control" type="email" autocomplete="email" /><span asp-validation-for="Email"></span></div></div>
+                        <div class="col-md-6"><div class="form-group"><div class="labeled heading-font"><label asp-for="PhoneNumber"></label></div><input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel" /><span asp-validation-for="PhoneNumber"></span></div></div>
+                        <div class="col-md-12"><div class="form-group"><div class="labeled heading-font"><label asp-for="LicenseNumber"></label></div><input asp-for="LicenseNumber" class="form-control" /><span asp-validation-for="LicenseNumber"></span></div></div>
+                        <div class="col-md-12"><button type="submit" class="button button-sm">Save driver details</button></div>
+                    </div>
+                </form>
+            </div>
+        </div></div></div>
+        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
+            <div class="widget widget_pages"><div class="widget-title"><h6>Owner-entered details</h6></div><p>Only the vehicle owner can create this staff profile. Drivers only claim an existing profile; they cannot enter or alter their identity, licence or fleet details.</p></div>
+        </div></div></div>
+    </div>
+</div>

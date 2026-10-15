@@ -1,0 +1,29 @@
+@model Return_trip.Models.AgentEmailLookupViewModel
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Claim agent profile";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
+            <div class="wpb_text_column wpb_content_element rt-registration-intro"><div class="wpb_wrapper">
+                <p>Your vehicle owner must register your agent details before you can create a sign-in. Enter the email address recorded on your agent profile.</p>
+            </div></div>
+            <div class="stm_auto_loan_calculator wide-version">
+                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>Find Your Agent Profile</h3></div>
+                <form asp-action="RegisterAgent" method="post" class="rt-registration-form">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                    <div class="row">
+                        <div class="col-md-12"><div class="form-group"><div class="labeled heading-font"><label asp-for="Email"></label></div><input asp-for="Email" class="form-control" type="email" autocomplete="email" /><span asp-validation-for="Email"></span></div></div>
+                        <div class="col-md-12"><button type="submit" class="button button-sm">Find my profile</button></div>
+                    </div>
+                </form>
+            </div>
+        </div></div></div>
+        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
+            <div class="widget widget_pages"><div class="widget-title"><h6>Owner-managed onboarding</h6></div><p>Your fleet owner enters your agent name, email and phone. The system verifies the existing record before letting you create your own password.</p></div>
+        </div></div></div>
+    </div>
+</div>

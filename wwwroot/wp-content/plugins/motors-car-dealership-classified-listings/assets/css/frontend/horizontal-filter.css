@@ -1,0 +1,13 @@
+.archive-listing-page .archive-listing-page_row .archive-listing-page_side.horizontal_filter {
+    float: none;
+    width: 100%;
+}
+
+.archive-listing-page .archive-listing-page_row .archive-listing-page_side.horizontal_filter .stm-horizontal-longer-filter {
+    display: none;
+}
+
+.archive-listing-page .archive-listing-page_row .archive-listing-page_content.horizontal_filter {
+    float: none;
+    width: 100%;
+}

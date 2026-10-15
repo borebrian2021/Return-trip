@@ -1,0 +1,37 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / VS Code local state
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET and test output
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# Local secrets and machine-specific configuration
+appsettings.Local.json
+appsettings.*.Local.json
+.env
+.env.*
+!.env.example
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp

@@ -1,0 +1,27 @@
+@model Return_trip.Models.RegistrationSuccessViewModel
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Registration submitted";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9"><div class="vc_column-inner"><div class="wpb_wrapper">
+            <div class="stm_auto_loan_calculator wide-version rt-registration-success">
+                <div class="title single-calculator-title"><i class="stm-icon-calculator"></i><h3>@(Model.RoleLabel == "Goods owner" ? "Account ready" : "Registration submitted")</h3></div>
+                <h4 class="heading-font">@(Model.RoleLabel == "Goods owner" ? "Your Goods Owner account is ready" : $"{Model.RoleLabel} registration received")</h4>
+                <p>@Model.Message</p>
+                <a class="button button-sm" asp-action="Register">Register another profile</a>
+                @if (Model.RoleLabel == "Vehicle owner")
+                {
+                    <a class="button button-sm" asp-action="AddDriver">Register a driver</a>
+                    <a class="button button-sm" asp-action="AddAgent">Register an agent</a>
+                }
+                <a class="button button-sm" asp-action="Index">Return to home</a>
+            </div>
+        </div></div></div>
+        <div class="wpb_column vc_column_container vc_col-sm-3"><div class="vc_column-inner"><div class="wpb_wrapper rt-registration-sidebar">
+            <div class="widget widget_pages"><div class="widget-title"><h6>@(Model.RoleLabel == "Goods owner" ? "You are signed in" : "What happens next?")</h6></div><p>@(Model.RoleLabel == "Goods owner" ? "Your account is ready. Return to the home page to continue with Return Trip." : "Your account request has been recorded for the next step in the Return Trip registration flow.")</p></div>
+        </div></div></div>
+    </div>
+</div>

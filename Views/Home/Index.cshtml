@@ -1,0 +1,240 @@
+﻿@{
+    ViewData["Title"] = "Journey Simulator";
+    ViewData["JourneyLayout"] = true;
+}
+
+<div class="journey-page" id="journeyApp">
+    <header class="journey-header">
+        <div>
+            <div class="eyebrow"><span class="eyebrow-dot"></span> RETURN TRIP · WORKFLOW PREVIEW</div>
+            <h1>From pickup to <span>proof of delivery.</span></h1>
+            <p>Walk through the cargo journey as the goods owner, transport agent, driver, and reviewer.</p>
+        </div>
+        <div class="header-actions">
+            <span class="demo-pill"><span></span> Demo mode</span>
+            <button type="button" class="btn-quiet" id="resetDemo">Reset journey</button>
+        </div>
+    </header>
+
+    <section class="journey-kpis" aria-label="Journey overview">
+        <article class="journey-kpi kpi-red"><div class="kpi-icon">▣</div><div><span>CARGO REQUEST</span><strong id="kpiCargo">Draft</strong><small id="kpiCargoSub">Not posted yet</small></div><i>▣</i></article>
+        <article class="journey-kpi kpi-gold"><div class="kpi-icon">⇄</div><div><span>RETURN TRUCKS</span><strong id="kpiTrucks">—</strong><small>Matching current route</small></div><i>⇄</i></article>
+        <article class="journey-kpi kpi-blue"><div class="kpi-icon">▤</div><div><span>AGENT BID</span><strong id="kpiBid">Waiting</strong><small id="kpiBidSub">No bid submitted</small></div><i>▤</i></article>
+        <article class="journey-kpi kpi-green"><div class="kpi-icon">✓</div><div><span>DELIVERY</span><strong id="kpiDelivery">Not started</strong><small id="kpiDeliverySub">Receipt not uploaded</small></div><i>✓</i></article>
+    </section>
+
+    <nav class="journey-steps" aria-label="Journey steps">
+        <button type="button" class="journey-step active" data-step-nav="post"><span>01</span><span>Post cargo</span></button>
+        <span class="step-line"></span>
+        <button type="button" class="journey-step" data-step-nav="bid"><span>02</span><span>Agent bid</span></button>
+        <span class="step-line"></span>
+        <button type="button" class="journey-step" data-step-nav="owner"><span>03</span><span>Owner decision</span></button>
+        <span class="step-line"></span>
+        <button type="button" class="journey-step" data-step-nav="driver"><span>04</span><span>Delivery proof</span></button>
+        <span class="step-line"></span>
+        <button type="button" class="journey-step" data-step-nav="confirm"><span>05</span><span>Agent confirms</span></button>
+    </nav>
+
+    <div class="demo-notice" role="note">
+        <span class="notice-icon">i</span>
+        Front-end simulation only. Demo places and trucks are sample data; changes stay in this page session. No accounts, SMS/email, cloud uploads, or database writes are connected.
+    </div>
+
+    <div class="journey-layout">
+        <main class="journey-main">
+            <section class="flow-panel" data-stage-panel="post">
+                <div class="panel-heading">
+                    <div class="step-kicker">GOODS OWNER · STEP 1</div>
+                    <h2>Post a cargo request</h2>
+                    <p>Choose map locations, a departure deadline, delivery date, and how you want to price transport.</p>
+                </div>
+                <form id="cargoForm">
+                    <div class="field-grid">
+                        <label class="field field-wide">
+                            <span>Cargo title</span>
+                            <input class="form-control" id="cargoTitle" maxlength="100" placeholder="e.g. Fresh produce delivery" required />
+                        </label>
+                        <label class="field field-wide">
+                            <span>Description <small>optional</small></span>
+                            <textarea class="form-control" id="cargoDescription" rows="2" maxlength="500" placeholder="What is being transported?"></textarea>
+                        </label>
+                        <label class="field">
+                            <span>Pickup location <b>From</b></span>
+                            <select class="form-select" id="cargoFrom" required>
+                                <option value="">Select a mapped place</option>
+                            </select>
+                            <small class="location-coordinate" id="fromCoordinate">Select a place to show its coordinates</small>
+                        </label>
+                        <label class="field">
+                            <span>Delivery location <b>To</b></span>
+                            <select class="form-select" id="cargoTo" required>
+                                <option value="">Select a mapped place</option>
+                            </select>
+                            <small class="location-coordinate" id="toCoordinate">Select a place to show its coordinates</small>
+                        </label>
+                        <label class="field">
+                            <span>Must depart by</span>
+                            <input class="form-control" id="requiredDepartureAt" type="datetime-local" required />
+                        </label>
+                        <label class="field">
+                            <span>Deliver by</span>
+                            <input class="form-control" id="deliveryDeadlineAt" type="datetime-local" required />
+                        </label>
+                        <label class="field">
+                            <span>Cargo weight</span>
+                            <div class="input-suffix"><input class="form-control" id="cargoWeight" type="number" min="0.01" step="0.01" value="1000" required /><span>kg</span></div>
+                        </label>
+                        <label class="field">
+                            <span>Retention period</span>
+                            <div class="input-suffix"><input class="form-control" id="retentionDays" type="number" min="1" step="1" value="2" required /><span>days</span></div>
+                        </label>
+                    </div>
+
+                    <fieldset class="pricing-fieldset">
+                        <legend>Transport price</legend>
+                        <div class="pricing-options">
+                            <label class="pricing-choice selected" data-pricing-choice="FixedTotal">
+                                <input type="radio" name="pricingMode" value="FixedTotal" checked />
+                                <span class="choice-mark"></span>
+                                <span><strong>Fixed total</strong><small>Enter one total transport price</small></span>
+                            </label>
+                            <label class="pricing-choice" data-pricing-choice="PerKg">
+                                <input type="radio" name="pricingMode" value="PerKg" />
+                                <span class="choice-mark"></span>
+                                <span><strong>Price per kg</strong><small>Rate × cargo weight calculates the total</small></span>
+                            </label>
+                        </div>
+                        <div class="field-grid price-inputs">
+                            <label class="field" id="fixedPriceField">
+                                <span>Fixed total price</span>
+                                <div class="input-prefix"><span>KSh</span><input class="form-control" id="fixedPrice" type="number" min="0.01" step="0.01" value="85000" required /></div>
+                            </label>
+                            <label class="field hidden" id="perKgPriceField">
+                                <span>Rate per kilogram</span>
+                                <div class="input-prefix"><span>KSh/kg</span><input class="form-control" id="pricePerKg" type="number" min="0.01" step="0.01" placeholder="e.g. 85" /></div>
+                            </label>
+                            <div class="calculated-total hidden" id="calculatedTotal">
+                                <span>Calculated transport total</span>
+                                <strong id="calculatedTotalValue">KSh 0.00</strong>
+                                <small id="calculatedFormula">Weight × rate per kg</small>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="availability-box">
+                        <div class="availability-intro">
+                            <div class="availability-icon">↔</div>
+                            <div><strong>Check returning trucks</strong><p>Find trucks on a matching route that are awaiting return.</p></div>
+                        </div>
+                        <button class="btn-secondary" type="button" id="checkAvailability" disabled>Check availability <span>→</span></button>
+                    </div>
+                    <div id="availabilityResults" class="availability-results hidden" aria-live="polite"></div>
+
+                    <div class="form-footer">
+                        <span class="form-hint" id="cargoFormHint">Select different pickup and delivery locations to check availability.</span>
+                        <button class="btn-primary" id="postCargo" type="submit" disabled>Post cargo request <span>→</span></button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="flow-panel hidden" data-stage-panel="bid">
+                <div class="panel-heading">
+                    <div class="step-kicker">TRANSPORT AGENT · STEP 2</div>
+                    <h2>Bid with a returning truck</h2>
+                    <p>Review the cargo and route, then offer the listed price or suggest a different amount with a reason.</p>
+                </div>
+                <div class="cargo-brief" id="agentCargoBrief"></div>
+                <form id="bidForm">
+                    <div class="bid-route-card" id="selectedTruckBrief"></div>
+                    <div class="field-grid">
+                        <label class="field">
+                            <span>Agent offer</span>
+                            <div class="input-prefix"><span>KSh</span><input class="form-control" id="agentBidAmount" type="number" min="0.01" step="0.01" required /></div>
+                            <small class="field-help" id="agentPriceHint"></small>
+                        </label>
+                        <label class="field">
+                            <span>Estimated arrival to pickup</span>
+                            <input class="form-control" id="truckEta" type="datetime-local" required />
+                        </label>
+                        <label class="field field-wide">
+                            <span>Price suggestion comments <small>required when offer exceeds listed price</small></span>
+                            <textarea class="form-control" id="suggestionComments" rows="3" placeholder="Explain the reason for the price change"></textarea>
+                        </label>
+                    </div>
+                    <div class="decision-note" id="bidRuleNote">Matching the listed price submits a standard bid for the goods owner to accept or reject.</div>
+                    <div class="form-footer">
+                        <button class="btn-quiet" type="button" data-go-stage="post">Back to cargo</button>
+                        <button class="btn-primary" type="submit">Send bid to owner <span>→</span></button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="flow-panel hidden" data-stage-panel="owner">
+                <div class="panel-heading">
+                    <div class="step-kicker">GOODS OWNER · STEP 3</div>
+                    <h2>Review the agent’s bid</h2>
+                    <p>Approve or reject a suggested price, or accept/reject a standard bid.</p>
+                </div>
+                <div id="ownerBidReview"></div>
+            </section>
+
+            <section class="flow-panel hidden" data-stage-panel="driver">
+                <div class="panel-heading">
+                    <div class="step-kicker">DRIVER · STEP 4</div>
+                    <h2>Deliver and upload signed proof</h2>
+                    <p>Mark the load in transit. After the receiver signs, upload a photo of the receipt for agent review.</p>
+                </div>
+                <div id="driverDelivery"></div>
+            </section>
+
+            <section class="flow-panel hidden" data-stage-panel="confirm">
+                <div class="panel-heading">
+                    <div class="step-kicker">TRANSPORT AGENT · STEP 5</div>
+                    <h2>Confirm delivery receipt</h2>
+                    <p>Review the driver’s signed receipt. Confirming completes this simulated cargo journey.</p>
+                </div>
+                <div id="agentReceiptReview"></div>
+            </section>
+
+            <section class="flow-panel hidden" data-stage-panel="done">
+                <div class="completion-panel">
+                    <div class="completion-check">✓</div>
+                    <div class="step-kicker">JOURNEY COMPLETE</div>
+                    <h2>Delivery confirmed.</h2>
+                    <p>The agent confirmed the signed receipt and the cargo journey is complete.</p>
+                    <div id="completionSummary"></div>
+                    <button class="btn-primary" type="button" id="startAnother">Start another journey <span>→</span></button>
+                </div>
+            </section>
+        </main>
+
+        <aside class="journey-sidebar">
+            <section class="side-card route-card">
+                <div class="side-card-heading"><span class="side-label">CURRENT JOURNEY</span><span class="status-pill" id="cargoStatus">Draft</span></div>
+                <div id="journeySummary" class="journey-summary empty-summary">
+                    <div class="summary-empty-icon">↗</div>
+                    <strong>Your journey starts here</strong>
+                    <p>Post a cargo request to see route, price, and delivery details.</p>
+                </div>
+                <div id="retentionControl" class="retention-control hidden">
+                    <div><strong>Retention expiry</strong><small id="retentionDate"></small></div>
+                    <button type="button" class="btn-expire" id="simulateExpiry">Simulate expiry</button>
+                </div>
+            </section>
+            <section class="side-card">
+                <div class="side-card-heading"><span class="side-label">ACTIVITY</span><span class="activity-count" id="activityCount">0</span></div>
+                <ol class="activity-feed" id="activityFeed"><li class="activity-empty">Journey events will appear here.</li></ol>
+            </section>
+            <section class="side-card flow-legend">
+                <div class="side-label">WHAT THIS PREVIEW COVERS</div>
+                <ul>
+                    <li><span class="legend-dot green"></span> Place selection & truck availability</li>
+                    <li><span class="legend-dot blue"></span> Fixed or per-kg pricing</li>
+                    <li><span class="legend-dot amber"></span> Agent bid & owner price decision</li>
+                    <li><span class="legend-dot purple"></span> Driver receipt & agent confirmation</li>
+                    <li><span class="legend-dot red"></span> Retention expiry & market relisting</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+</div>

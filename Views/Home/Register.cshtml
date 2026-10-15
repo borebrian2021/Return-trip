@@ -1,0 +1,62 @@
+@{
+    Layout = "_RegistrationLayout";
+    ViewData["Title"] = "Choose registration";
+}
+
+<div class="wpb-content-wrapper">
+    <div class="vc_row wpb_row vc_row-fluid rt-registration-section">
+        <div class="wpb_column vc_column_container vc_col-sm-9">
+            <div class="vc_column-inner">
+                <div class="wpb_wrapper">
+                    <div class="wpb_text_column wpb_content_element rt-registration-intro">
+                        <div class="wpb_wrapper">
+                            <p>Choose the account that matches your role in the freight journey. Goods owners post cargo, vehicle owners manage fleets, and drivers register through the fleet they work with. Company agents are onboarded by their vehicle owner.</p>
+                        </div>
+                    </div>
+
+                    <div class="stm_auto_loan_calculator wide-version rt-registration-roles">
+                        <div class="title single-calculator-title">
+                            <i class="stm-icon-calculator"></i>
+                            <h3>Register with Return Trip</h3>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="role-option">
+                                    <h4 class="heading-font">Goods owner</h4>
+                                    <p>Post freight requests and connect your cargo with available return-trip vehicles.</p>
+                                    <a class="button button-sm" asp-action="RegisterGoodsOwner">Register as goods owner</a>
+                                </div>
+                                <div class="role-option">
+                                    <h4 class="heading-font">Vehicle owner</h4>
+                                    <p>Register your transport business and manage your vehicles, drivers, and company agents.</p>
+                                    <a class="button button-sm" asp-action="RegisterVehicleOwner">Register as vehicle owner</a>
+                                </div>
+                                <div class="role-option">
+                                    <h4 class="heading-font">Driver</h4>
+                                    <p>Your vehicle owner records your driver details first. Use your ID to find that profile and create your sign-in.</p>
+                                    <a class="button button-sm" asp-action="RegisterDriver">Register as driver</a>
+                                </div>
+                                <div class="role-option">
+                                    <h4 class="heading-font">Company agent</h4>
+                                    <p>Your vehicle owner enters your agent details first. Claim the existing profile using its registered email.</p>
+                                    <a class="button button-sm" asp-action="RegisterAgent">Claim agent profile</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="wpb_column vc_column_container vc_col-sm-3">
+            <div class="vc_column-inner">
+                <div class="wpb_wrapper rt-registration-sidebar">
+                    <div class="widget widget_pages">
+                        <div class="widget-title"><h6>Registration guide</h6></div>
+                        <p>Goods owners and vehicle owners can start with a direct registration. Driver accounts must be connected to a fleet. Agent access is requested through the vehicle owner.</p>
+                        <p><a asp-controller="Home" asp-action="Index">Return to Return Trip home</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

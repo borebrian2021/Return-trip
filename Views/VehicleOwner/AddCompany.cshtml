@@ -1,0 +1,83 @@
+@model CompanyRegistrationViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Register Company";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-building me-2" style="color:#d4890a;font-size:20px;"></i>Register Company</h1>
+        <p class="dash-page-header__sub">Add the company that your vehicles and agents will operate under.</p>
+    </div>
+</div>
+
+<div class="dash-panel">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title">Company Details</h2>
+    </div>
+
+    <form asp-action="AddCompany" method="post" enctype="multipart/form-data" class="row g-3">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="col-md-6">
+            <label asp-for="CompanyName" class="form-label"></label>
+            <input asp-for="CompanyName" class="form-control" />
+            <span asp-validation-for="CompanyName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="RegistrationNumber" class="form-label"></label>
+            <input asp-for="RegistrationNumber" class="form-control" />
+            <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="BusinessSector" class="form-label"></label>
+            <select asp-for="BusinessSector" class="form-select">
+                <option value="">-- Select business sector --</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Construction">Construction</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Mining">Mining</option>
+                <option value="Retail and wholesale">Retail and wholesale</option>
+                <option value="Transport and logistics">Transport and logistics</option>
+                <option value="Other">Other</option>
+            </select>
+            <span asp-validation-for="BusinessSector" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control" />
+            <span asp-validation-for="Location" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="CertificateOfRegistration" class="form-label"></label>
+            <input asp-for="CertificateOfRegistration" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" />
+            <span asp-validation-for="CertificateOfRegistration" class="text-danger"></span>
+            <small class="form-text text-muted">PDF, JPG, or PNG. Maximum file size: 10 MB.</small>
+        </div>
+
+        <div class="col-12 d-flex justify-content-between align-items-center mt-4">
+            <a asp-action="Companies" class="btn btn-outline-secondary">Back to Companies</a>
+            <button type="submit" class="btn btn-primary">Save Company</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

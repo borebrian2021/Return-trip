@@ -23,52 +23,118 @@
         </div>
 
         <nav class="dash-sidebar__nav">
-            <p class="dash-nav-label">Main</p>
-            <ul>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "dashboard" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="Dashboard">
-                        <i class="fa fa-th-large"></i><span>Dashboard</span>
-                    </a>
-                </li>
-            </ul>
+            @{ var role = ViewData["DashRole"]?.ToString() ?? "GoodsOwner"; }
 
-            <p class="dash-nav-label">Cargo</p>
-            <ul>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "post" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="PostCargo">
-                        <i class="fa fa-plus-circle"></i><span>Post Cargo</span>
-                    </a>
-                </li>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "listings" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="MyListings">
-                        <i class="fa fa-list"></i><span>My Listings</span>
-                    </a>
-                </li>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "bids" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="Bids">
-                        <i class="fa fa-gavel"></i><span>Bids Received</span>
-                    </a>
-                </li>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "transit" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="InTransit">
-                        <i class="fa fa-truck"></i><span>In Transit</span>
-                    </a>
-                </li>
-            </ul>
-
-            <p class="dash-nav-label">Account</p>
-            <ul>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "banking" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="Banking">
-                        <i class="fa fa-university"></i><span>Bank Details</span>
-                    </a>
-                </li>
-                <li class="@(ViewData["ActiveNav"]?.ToString() == "profile" ? "active" : "")">
-                    <a asp-controller="GoodsOwner" asp-action="Profile">
-                        <i class="fa fa-user-circle"></i><span>Profile</span>
-                    </a>
-                </li>
-            </ul>
+            @if (role == "GoodsOwner")
+            {
+                <p class="dash-nav-label">Main</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "dashboard" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="Dashboard">
+                            <i class="fa fa-th-large"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="dash-nav-label">Cargo</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "post" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="PostCargo">
+                            <i class="fa fa-plus-circle"></i><span>Post Cargo</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "listings" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="MyListings">
+                            <i class="fa fa-list"></i><span>My Listings</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "bids" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="Bids">
+                            <i class="fa fa-gavel"></i><span>Bids Received</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "transit" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="InTransit">
+                            <i class="fa fa-truck"></i><span>In Transit</span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="dash-nav-label">Account</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "banking" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="Banking">
+                            <i class="fa fa-university"></i><span>Bank Details</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "profile" ? "active" : "")">
+                        <a asp-controller="GoodsOwner" asp-action="Profile">
+                            <i class="fa fa-user-circle"></i><span>Profile</span>
+                        </a>
+                    </li>
+                </ul>
+            }
+            else if (role == "VehicleOwner")
+            {
+                <p class="dash-nav-label">Main</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "dashboard" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Dashboard">
+                            <i class="fa fa-th-large"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="dash-nav-label">Fleet</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "drivers" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Drivers">
+                            <i class="fa fa-id-card"></i><span>Drivers</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "agents" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Agents">
+                            <i class="fa fa-user-tie"></i><span>Agents</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "companies" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Companies">
+                            <i class="fa fa-building"></i><span>Companies</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "vehicles" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Vehicles">
+                            <i class="fa fa-truck"></i><span>Vehicles</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "fleet" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Fleet">
+                            <i class="fa fa-route"></i><span>Fleet Routes</span>
+                        </a>
+                    </li>
+                </ul>
+                <p class="dash-nav-label">Business</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "earnings" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Earnings">
+                            <i class="fa fa-coins"></i><span>Earnings</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "profile" ? "active" : "")">
+                        <a asp-controller="VehicleOwner" asp-action="Profile">
+                            <i class="fa fa-user-circle"></i><span>Profile</span>
+                        </a>
+                    </li>
+                </ul>
+            }
+            else if (role == "CompanyAgent")
+            {
+                <p class="dash-nav-label">Fleet</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "routes" ? "active" : "")">
+                        <a asp-controller="Agent" asp-action="Routes">
+                            <i class="fa fa-route"></i><span>Vehicle Routes</span>
+                        </a>
+                    </li>
+                </ul>
+            }
         </nav>
 
         <div class="dash-sidebar__signout">
@@ -101,7 +167,7 @@
                     </div>
                     <div class="dash-topbar__user-info">
                         <span class="dash-topbar__user-name">@ViewData["UserFullName"]</span>
-                        <span class="dash-topbar__user-role">Goods Owner</span>
+                        <span class="dash-topbar__user-role">@(ViewData["DashRoleLabel"] ?? (ViewData["DashRole"]?.ToString() == "GoodsOwner" ? "Goods Owner" : "Vehicle Owner"))</span>
                     </div>
                 </div>
             </div>

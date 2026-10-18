@@ -1,0 +1,105 @@
+@model Return_trip.Models.AgentProfileViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Add Agent";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-user-tie me-2" style="color:#0e7490;font-size:20px;"></i>Add Agent</h1>
+        <p class="dash-page-header__sub">
+            Register an agent's details. They claim this profile using their email address.
+        </p>
+    </div>
+    <div class="dash-page-header__actions">
+        <a asp-action="Agents" class="dash-btn dash-btn--outline">
+            <i class="fa fa-arrow-left"></i> Back to Agents
+        </a>
+    </div>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="dash-alert dash-alert--error mb-4">
+        <i class="fa fa-exclamation-circle me-2"></i>
+        <div asp-validation-summary="ModelOnly"></div>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title">
+                    <i class="fa fa-user me-2" style="color:#0e7490;"></i>Agent Details
+                </h2>
+            </div>
+            <div class="post-cargo-body">
+                <form asp-controller="VehicleOwner" asp-action="AddAgent" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="FullName">Full Name</label>
+                                <input asp-for="FullName" class="form-control" autocomplete="name"
+                                       placeholder="e.g. Grace Wanjiku" />
+                                <span asp-validation-for="FullName" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="Email">Email Address</label>
+                                <input asp-for="Email" class="form-control" type="email" autocomplete="email"
+                                       placeholder="agent@yourcompany.co.ke" />
+                                <span asp-validation-for="Email" class="post-field-error"></span>
+                                <small>This email is used to claim the profile — must be the agent's real address.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="PhoneNumber">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control" type="tel" autocomplete="tel"
+                                       placeholder="+254 7xx xxx xxx" />
+                                <span asp-validation-for="PhoneNumber" class="post-field-error"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4">
+                        <a asp-action="Agents" class="dash-btn dash-btn--outline">Cancel</a>
+                        <button type="submit" class="dash-btn dash-btn--primary" style="flex:1;justify-content:center;">
+                            <i class="fa fa-save me-2"></i>Save Agent Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-info-circle me-2" style="color:#0e7490;"></i>Agent Role</h2>
+            </div>
+            <div class="post-cargo-body">
+                <div class="auth-info-banner" style="margin:0;">
+                    <strong><i class="fa fa-gavel me-1"></i>What agents do</strong>
+                    Agents bid on cargo listings on behalf of your fleet. They post vehicle routes,
+                    manage bids, and confirm deliveries. They cannot access your financial or
+                    company registration details.
+                </div>
+                <div class="auth-info-banner mt-3" style="margin:0;">
+                    <strong><i class="fa fa-envelope me-1"></i>Claiming the profile</strong>
+                    The agent goes to the Register page, enters their email, and sets a password
+                    to activate their account. Until they claim it, the profile is visible here
+                    as "Unclaimed".
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

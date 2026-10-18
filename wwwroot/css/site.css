@@ -637,17 +637,26 @@ textarea { height: auto !important; }
   position: relative;
   display: flex;
   flex-direction: column;
-  cursor: default;         /* card itself is not a link anymore */
-  text-decoration: none;
+  cursor: default;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+  transition: transform .25s ease, box-shadow .25s ease;
+  overflow: hidden;
+  background: #ffffff;
 }
-
-/* image: fixed height, object-fit so all photos look uniform */
+.freight-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(26,60,94,.18);
+}
+/* kill the Furni product-thumbnail margin and top animation on freight cards */
 .freight-card .product-thumbnail {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 10px 10px 0 0;
-  margin-bottom: 0;
+  border-radius: 0;
+  margin-bottom: 0 !important;
+  top: 0 !important;
+  display: block;
 }
 
 /* ── Status badge ────────────────────────────────────────────────────────────── */
@@ -672,10 +681,10 @@ textarea { height: auto !important; }
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 16px 16px 20px;
+  padding: 16px 18px 20px;
   background: #ffffff;
-  border-radius: 0 0 10px 10px;
-  border: 1px solid #e8eceb;
+  border-radius: 0 0 14px 14px;
+  border: 1px solid #edf0ef;
   border-top: none;
 }
 
@@ -734,8 +743,9 @@ textarea { height: auto !important; }
   gap: 8px 12px;
   padding: 12px;
   background: #f7f9f8;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 16px;
+  border: 1px solid #edf0ef;
 }
 .freight-detail-item {
   display: flex;
@@ -765,10 +775,16 @@ textarea { height: auto !important; }
   display: block;
   width: 100%;
   text-align: center;
-  border-radius: 8px !important;
-  padding: 10px 0;
+  border-radius: 10px !important;
+  padding: 11px 0;
   font-size: 14px;
+  font-weight: 700;
   margin-top: auto;
+  letter-spacing: .3px;
+  transition: background .2s, box-shadow .2s;
+}
+.freight-bid-btn:hover {
+  box-shadow: 0 4px 14px rgba(26,60,94,.25);
 }
 
 /* keep card hover background effect from Furni but limit to the shell */
@@ -896,11 +912,11 @@ body.auth-page {
 .auth-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 40px 40px 36px;
+  /* padding: 40px 40px 36px; */
   box-shadow: 0 4px 24px rgba(0,0,0,.07);
 }
 @media (max-width: 480px) {
-  .auth-card { padding: 28px 20px 24px; }
+  /* .auth-card { padding: 28px 20px 24px; } */
 }
 
 .auth-card__eyebrow {
@@ -1029,13 +1045,11 @@ body.auth-page {
 }
 
 /* ── Role option cards (Register hub) ────────────────────────────────────────── */
-.role-cards { display: flex; flex-direction: column; gap: 14px; }
+.role-cards { display: flex; flex-direction: column;  }
 .role-card {
   display: flex;
   align-items: center;
-  gap: 18px;
   padding: 18px 20px;
-  border-radius: 12px;
   border: 1.5px solid #e0e4e3;
   background: #ffffff;
   text-decoration: none;
@@ -1477,6 +1491,24 @@ body.dash-body {
 }
 .dash-panel__action:hover { text-decoration: underline; }
 
+/* Keep dashboard forms comfortably spaced without changing public auth forms. */
+.dash-content .dash-panel > form {
+  padding: 24px;
+  --bs-gutter-y: 1.25rem;
+}
+.dash-content .dash-panel .post-cargo-body {
+  padding: 24px;
+}
+.dash-content .dash-panel .post-cargo-body form .row {
+  --bs-gutter-y: 1.25rem;
+}
+@media (max-width: 600px) {
+  .dash-content .dash-panel > form,
+  .dash-content .dash-panel .post-cargo-body {
+    padding: 18px;
+  }
+}
+
 /* table inside panel */
 .dash-table {
   width: 100%;
@@ -1562,3 +1594,82 @@ body.dash-body {
 }
 .dash-empty i { font-size: 36px; margin-bottom: 14px; display: block; opacity: .3; }
 .dash-empty p { font-size: 14px; margin: 0 0 16px; }
+
+/* ─── Nominatim location autocomplete dropdown ──────────────────────────────── */
+.nominatim-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border: 1.5px solid #e0e4e3;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  display: none;
+  max-height: 260px;
+  overflow-y: auto;
+}
+.nominatim-item {
+  display: flex;
+  flex-direction: column;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid #f4f6f5;
+}
+.nominatim-item:last-child { border-bottom: none; }
+.nominatim-item:hover { background: #eef3f7; }
+.nominatim-primary {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2f2f2f;
+}
+.nominatim-secondary {
+  font-size: 11px;
+  color: #9a9a9a;
+  margin-top: 2px;
+}
+/* ensure the input wrap is positioned so dropdown sits below it */
+.location-input-wrap { position: relative; }
+
+/* ─── PostCargo — Schedule & Contacts ──────────────────────────────────────── */
+
+.schedule-urgent-notice {
+  background: #fff8e6;
+  border: 1px solid #f5d97a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #92660a;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.contacts-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #1a3c5e;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contacts-reveal-note {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #9a9a9a;
+  background: #f7f9f8;
+  border-radius: 20px;
+  padding: 3px 10px;
+}

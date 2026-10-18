@@ -7,6 +7,9 @@ public class Driver
     public int VehicleOwnerId { get; set; }
     public VehicleOwner VehicleOwner { get; set; } = null!;
 
+    public int? VehicleDetailId { get; set; }
+    public VehicleDetail? VehicleDetail { get; set; }
+
     public string FullName { get; set; } = string.Empty;
     public string IdNumber { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

@@ -1,0 +1,122 @@
+@model List<AgentRowViewModel>
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Agents";
+    var filter = ViewData["Filter"] as string;
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-user-tie me-2" style="color:#0e7490;font-size:20px;"></i>Agents</h1>
+        <p class="dash-page-header__sub">Company agents who bid on cargo on behalf of your fleet.</p>
+    </div>
+    <div class="dash-page-header__actions">
+        <a asp-action="AddAgent" class="dash-btn dash-btn--primary">
+            <i class="fa fa-plus"></i> Add Agent
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="dash-alert dash-alert--success mb-4">
+        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
+    </div>
+}
+
+<!-- Filter strip -->
+<div class="listings-stat-strip mb-4">
+    <a asp-action="Agents" class="listings-stat @(filter == null ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count</span>
+        <span class="listings-stat__label">All</span>
+    </a>
+    <a asp-action="Agents" asp-route-filter="active" class="listings-stat @(filter == "active" ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count(a => a.IsActive)</span>
+        <span class="listings-stat__label">Active</span>
+    </a>
+    <a asp-action="Agents" asp-route-filter="claimed" class="listings-stat @(filter == "claimed" ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count(a => a.HasAccount)</span>
+        <span class="listings-stat__label">Claimed</span>
+    </a>
+    <a asp-action="Agents" asp-route-filter="unclaimed" class="listings-stat @(filter == "unclaimed" ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count(a => !a.HasAccount)</span>
+        <span class="listings-stat__label">Unclaimed</span>
+    </a>
+</div>
+
+<div class="dash-panel">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title">@(filter != null ? $"Showing: {filter}" : "All Agents")</h2>
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="dash-empty">
+            <i class="fa fa-user-tie"></i>
+            <p>No agents found. Add an agent to start bidding on cargo.</p>
+            <a asp-action="AddAgent" class="dash-btn dash-btn--primary"><i class="fa fa-plus"></i> Add Agent</a>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Company</th>
+                        <th>Account</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td class="td-primary">@a.FullName</td>
+                            <td class="td-muted" style="font-size:12px;">@a.Email</td>
+                            <td class="td-muted">@a.PhoneNumber</td>
+                            <td class="td-muted">@(a.CompanyName ?? "—")</td>
+                            <td>
+                                @if (a.HasAccount)
+                                {
+                                    <span class="dash-stat-card__badge dash-stat-card__badge--green">
+                                        <i class="fa fa-check me-1"></i> Yes
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="dash-stat-card__badge dash-stat-card__badge--amber">
+                                        <i class="fa fa-clock me-1"></i> Pending
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <span class="status-pill status-pill--@(a.IsActive ? "accepted" : "closed")">
+                                    @(a.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
+                            <td>
+                                <form asp-action="ToggleAgent" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.Id">
+                                    <button type="submit" class="dash-btn dash-btn--outline"
+                                            style="padding:5px 12px;font-size:11px;">
+                                        <i class="fa @(a.IsActive ? "fa-pause" : "fa-play") me-1"></i>
+                                        @(a.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Styles {
+<style>.dash-alert--success { background:#e6f4ee;color:#1a7a45;border:1px solid #b7dfc8; }</style>
+}

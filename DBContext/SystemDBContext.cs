@@ -76,6 +76,12 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Driver>()
+            .HasOne(d => d.VehicleDetail)
+            .WithMany(v => v.Drivers)
+            .HasForeignKey(d => d.VehicleDetailId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Driver>()
             .HasOne(d => d.UserAccount)
             .WithMany(u => u.Drivers)
             .HasForeignKey(d => d.UserAccountId)
@@ -332,7 +338,5 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
         modelBuilder.Entity<VehicleRoute>()
             .Property(r => r.ToLongitude)
             .HasPrecision(9, 6);
-
-        base.OnModelCreating(modelBuilder);
     }
 }

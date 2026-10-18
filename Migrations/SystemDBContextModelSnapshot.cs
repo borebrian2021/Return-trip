@@ -118,6 +118,9 @@ namespace Return_trip.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal?>("DistanceKm")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal?>("FromLatitude")
                         .HasPrecision(9, 6)
                         .HasColumnType("decimal(9,6)");
@@ -145,11 +148,28 @@ namespace Return_trip.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("PickupDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PickupDeadlineAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal?>("PricePerKg")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PricingMode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiverEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiverName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiverPhone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -164,6 +184,14 @@ namespace Return_trip.Migrations
 
                     b.Property<int>("RetentionPeriodDays")
                         .HasColumnType("int");
+
+                    b.Property<string>("SenderContactName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SenderPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -346,6 +374,10 @@ namespace Return_trip.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BusinessSector")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CertificateOfRegistrationType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -501,6 +533,9 @@ namespace Return_trip.Migrations
                     b.Property<int?>("UserAccountId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("VehicleDetailId")
+                        .HasColumnType("int");
+
                     b.Property<int>("VehicleOwnerId")
                         .HasColumnType("int");
 
@@ -510,6 +545,8 @@ namespace Return_trip.Migrations
                         .IsUnique();
 
                     b.HasIndex("UserAccountId");
+
+                    b.HasIndex("VehicleDetailId");
 
                     b.HasIndex("VehicleOwnerId");
 
@@ -820,7 +857,7 @@ namespace Return_trip.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("UserAccounts", (string)null);
                 });
 
             modelBuilder.Entity("VehicleDetail", b =>
@@ -831,14 +868,38 @@ namespace Return_trip.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal?>("Capacity")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("InspectionExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InspectionReportType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InspectionReportUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InsuranceDocumentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InsuranceDocumentUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("InsuranceExpiryDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
+
+                    b.Property<string>("LastCargoTransported")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LicenseDocumentType")
                         .IsRequired()
@@ -849,7 +910,6 @@ namespace Return_trip.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LicenseNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegistrationNumber")
@@ -1148,6 +1208,11 @@ namespace Return_trip.Migrations
                         .HasForeignKey("UserAccountId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("VehicleDetail", "VehicleDetail")
+                        .WithMany("Drivers")
+                        .HasForeignKey("VehicleDetailId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("VehicleOwner", "VehicleOwner")
                         .WithMany("Drivers")
                         .HasForeignKey("VehicleOwnerId")
@@ -1155,6 +1220,8 @@ namespace Return_trip.Migrations
                         .IsRequired();
 
                     b.Navigation("UserAccount");
+
+                    b.Navigation("VehicleDetail");
 
                     b.Navigation("VehicleOwner");
                 });
@@ -1344,6 +1411,8 @@ namespace Return_trip.Migrations
 
             modelBuilder.Entity("VehicleDetail", b =>
                 {
+                    b.Navigation("Drivers");
+
                     b.Navigation("Routes");
                 });
 

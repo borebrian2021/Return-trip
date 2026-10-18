@@ -14,12 +14,28 @@ public class Cargo
     public string? ToPlaceId { get; set; }
     public decimal? ToLatitude { get; set; }
     public decimal? ToLongitude { get; set; }
-    public DateTime? RequiredDepartureAt { get; set; }
-    public DateTime? DeliveryDeadlineAt { get; set; }
+    public decimal? DistanceKm { get; set; }
+
+    // ── Schedule ─────────────────────────────────────────────────────────────
+    public DateTime? PickupDateTime { get; set; }        // exact scheduled pickup
+    public DateTime? PickupDeadlineAt { get; set; }      // latest acceptable pickup time
+    public DateTime? DeliveryDeadlineAt { get; set; }    // delivery must complete by
+    public DateTime? RequiredDepartureAt { get; set; }   // kept for legacy compatibility
     public DateTime? DepartedAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime? RetentionExpiresAt { get; set; }
     public DateTime? ReopenedAt { get; set; }
+
+    // ── Sender contact ────────────────────────────────────────────────────────
+    public string SenderContactName { get; set; } = string.Empty;
+    public string SenderPhone { get; set; } = string.Empty;
+
+    // ── Receiver contact (revealed to driver after advance payment) ───────────
+    public string ReceiverName { get; set; } = string.Empty;
+    public string ReceiverPhone { get; set; } = string.Empty;
+    public string? ReceiverEmail { get; set; }
+
+    // ── Cargo details ─────────────────────────────────────────────────────────
     public decimal WeightKg { get; set; }
     public string PackageType { get; set; } = string.Empty;
     public string PricingMode { get; set; } = "FixedTotal";

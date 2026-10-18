@@ -35,3 +35,7 @@ appsettings.*.Local.json
 *.log
 *.tmp
 *.temp
+
+# Private company registration certificates
+/App_Data/company-certificates/
+/App_Data/vehicle-documents/

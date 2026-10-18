@@ -133,7 +133,7 @@ public class HomeController : Controller
         await _signInManager.SignInAsync(user, isPersistent: false);
 
         TempData["RegistrationSuccess"] = "Your vehicle owner account was created and you are signed in. You can now register your drivers.";
-        return RedirectToAction(nameof(RegisterSuccess), new { role = "Vehicle owner" });
+        return RedirectToAction("Dashboard", "VehicleOwner");
     }
 
     [HttpGet]

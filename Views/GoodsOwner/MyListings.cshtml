@@ -110,12 +110,12 @@
                             <td>
                                 @if (c.PricingMode == "PerKg")
                                 {
-                                    <div class="td-primary">R @c.PricePerKg?.ToString("N2")/kg</div>
-                                    <div class="td-muted">R @c.TransportCost.ToString("N0") total</div>
+                                    <div class="td-primary">KSh @c.PricePerKg?.ToString("N2")/kg</div>
+                                    <div class="td-muted">KSh @c.TransportCost.ToString("N0") total</div>
                                 }
                                 else
                                 {
-                                    <div class="td-primary">R @c.TransportCost.ToString("N0")</div>
+                                    <div class="td-primary">KSh @c.TransportCost.ToString("N0")</div>
                                 }
                             </td>
                             <td>

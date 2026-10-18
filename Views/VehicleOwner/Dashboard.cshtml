@@ -1,0 +1,298 @@
+@model VehicleOwnerDashboardViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- ── Page header ──────────────────────────────────────────────────────────── -->
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-th-large me-2" style="color:#1a3c5e;font-size:20px;"></i>Dashboard</h1>
+        <p class="dash-page-header__sub">
+            Welcome back, <strong>@Model.OwnerName</strong> &mdash;
+            @DateTime.Now.ToString("dddd, dd MMMM yyyy")
+        </p>
+    </div>
+    <div class="dash-page-header__actions">
+        <a asp-action="AddDriver" class="dash-btn dash-btn--primary">
+            <i class="fa fa-plus"></i> Add Driver
+        </a>
+        <a asp-action="AddAgent" class="dash-btn dash-btn--outline">
+            <i class="fa fa-user-plus"></i> Add Agent
+        </a>
+    </div>
+</div>
+
+<!-- ── Stat cards ───────────────────────────────────────────────────────────── -->
+<div class="dash-stat-grid" style="grid-template-columns:repeat(4,1fr);">
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--blue">
+            <i class="fa fa-id-card"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.TotalDrivers</div>
+            <div class="dash-stat-card__label">Total Drivers</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--green">
+                @Model.VerifiedDrivers verified
+            </span>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--teal">
+            <i class="fa fa-user-tie"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.TotalAgents</div>
+            <div class="dash-stat-card__label">Agents</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--blue">
+                @Model.ActiveAgents active
+            </span>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--amber">
+            <i class="fa fa-truck"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.TotalVehicles</div>
+            <div class="dash-stat-card__label">Vehicles</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--@(Model.ApprovedVehicles > 0 ? "green" : "amber")">
+                @Model.ApprovedVehicles approved
+            </span>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--green">
+            <i class="fa fa-coins"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">KSh @Model.EarningsThisMonth.ToString("N0")</div>
+            <div class="dash-stat-card__label">Earnings This Month</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--green">
+                @Model.DeliveredThisMonth delivered
+            </span>
+        </div>
+    </div>
+
+</div>
+
+<div class="dash-stat-grid" style="grid-template-columns:repeat(4,1fr);margin-top:-8px;">
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--navy">
+            <i class="fa fa-building"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.TotalCompanies</div>
+            <div class="dash-stat-card__label">Companies</div>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--amber">
+            <i class="fa fa-gavel"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.ActiveBids</div>
+            <div class="dash-stat-card__label">Active Bids</div>
+            <span class="dash-stat-card__badge dash-stat-card__badge--amber">Pending</span>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--teal">
+            <i class="fa fa-shipping-fast"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.InTransitCargo</div>
+            <div class="dash-stat-card__label">In Transit</div>
+        </div>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--purple">
+            <i class="fa fa-check-double"></i>
+        </div>
+        <div class="dash-stat-card__body">
+            <div class="dash-stat-card__value">@Model.DeliveredThisMonth</div>
+            <div class="dash-stat-card__label">Delivered This Month</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Bottom panels ─────────────────────────────────────────────────────────── -->
+<div class="row g-4 mt-1">
+
+    <!-- Recent Drivers -->
+    <div class="col-lg-6">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-id-card me-2" style="color:#1a3c5e;"></i>Recent Drivers</h2>
+                <a asp-action="Drivers" class="dash-panel__action">View all</a>
+            </div>
+            @if (!Model.RecentDrivers.Any())
+            {
+                <div class="dash-empty">
+                    <i class="fa fa-id-card"></i>
+                    <p>No drivers added yet.</p>
+                    <a asp-action="AddDriver" class="dash-btn dash-btn--primary"><i class="fa fa-plus"></i> Add Driver</a>
+                </div>
+            }
+            else
+            {
+                <table class="dash-table">
+                    <thead><tr><th>Name</th><th>ID Number</th><th>Phone</th><th>Status</th></tr></thead>
+                    <tbody>
+                        @foreach (var d in Model.RecentDrivers)
+                        {
+                            <tr>
+                                <td class="td-primary">@d.FullName</td>
+                                <td class="td-muted">@d.IdNumber</td>
+                                <td class="td-muted">@d.PhoneNumber</td>
+                                <td>
+                                    @if (d.IsVerified)
+                                    {
+                                        <span class="status-pill status-pill--accepted">Verified</span>
+                                    }
+                                    else if (d.HasAccount)
+                                    {
+                                        <span class="status-pill status-pill--open">Claimed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-pill status-pill--pending">Unclaimed</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <!-- Recent Agents -->
+    <div class="col-lg-6">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-user-tie me-2" style="color:#0e7490;"></i>Recent Agents</h2>
+                <a asp-action="Agents" class="dash-panel__action">View all</a>
+            </div>
+            @if (!Model.RecentAgents.Any())
+            {
+                <div class="dash-empty">
+                    <i class="fa fa-user-tie"></i>
+                    <p>No agents added yet.</p>
+                    <a asp-action="AddAgent" class="dash-btn dash-btn--primary"><i class="fa fa-plus"></i> Add Agent</a>
+                </div>
+            }
+            else
+            {
+                <table class="dash-table">
+                    <thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Status</th></tr></thead>
+                    <tbody>
+                        @foreach (var a in Model.RecentAgents)
+                        {
+                            <tr>
+                                <td class="td-primary">@a.FullName</td>
+                                <td class="td-muted" style="font-size:12px;">@a.Email</td>
+                                <td class="td-muted">@(a.CompanyName ?? "—")</td>
+                                <td>
+                                    @if (a.IsActive && a.HasAccount)
+                                    {
+                                        <span class="status-pill status-pill--accepted">Active</span>
+                                    }
+                                    else if (!a.HasAccount)
+                                    {
+                                        <span class="status-pill status-pill--pending">Unclaimed</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-pill status-pill--closed">Inactive</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Recent bids + chart ────────────────────────────────────────────────────── -->
+<div class="row g-4 mt-0">
+    <div class="col-lg-7">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-gavel me-2" style="color:#d4890a;"></i>Recent Bids by Agents</h2>
+                <a asp-action="Fleet" class="dash-panel__action">View fleet</a>
+            </div>
+            @if (!Model.RecentBids.Any())
+            {
+                <div class="dash-empty">
+                    <i class="fa fa-gavel"></i>
+                    <p>No bids placed yet. Add agents so they can bid on cargo listings.</p>
+                </div>
+            }
+            else
+            {
+                <table class="dash-table">
+                    <thead><tr><th>Cargo</th><th>Route</th><th>Agent</th><th>Amount</th><th>Status</th></tr></thead>
+                    <tbody>
+                        @foreach (var b in Model.RecentBids)
+                        {
+                            <tr>
+                                <td class="td-primary">@b.CargoTitle</td>
+                                <td class="td-muted" style="font-size:12px;">@b.Route</td>
+                                <td class="td-muted">@b.AgentName</td>
+                                <td class="td-primary">KSh @b.BidAmount.ToString("N0")</td>
+                                <td><span class="status-pill status-pill--@b.Status.ToLower()">@b.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="dash-panel">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title"><i class="fa fa-chart-line me-2" style="color:#1a3c5e;"></i>Bids — Last 6 Months</h2>
+            </div>
+            <div style="padding:20px 24px 24px;">
+                <canvas id="monthlyChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyBids.Select(m => m.Month)));
+    const data   = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyBids.Select(m => m.Count)));
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{ label: 'Bids', data: data, backgroundColor: 'rgba(26,60,94,.7)', borderRadius: 6 }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 12 } } },
+                y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'Inter', size: 12 } }, grid: { color: '#f0f2f1' } }
+            }
+        }
+    });
+</script>
+}

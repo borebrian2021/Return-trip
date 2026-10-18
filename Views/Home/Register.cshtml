@@ -4,13 +4,14 @@
 }
 
 <div class="auth-card">
-    <p class="auth-card__eyebrow"><i class="fa fa-user-plus me-1"></i>Get Started</p>
+<div style="margin:30px;padding-top:30px">
+    <p class="auth-card__eyebrow" style="margin-top:15px"><i class="fa fa-user-plus me-1"></i>Get Started</p>
     <h1 class="auth-card__title">Choose your role</h1>
-    <p class="auth-card__sub">
+    <p class="auth-card__sub ">
         Select the account type that matches your place in the freight journey.
         All roles are free to register.
     </p>
-
+</div>
     <div class="role-cards">
 
         <a class="role-card" asp-action="RegisterGoodsOwner">
@@ -40,7 +41,7 @@
             <i class="fa fa-chevron-right role-card__arrow"></i>
         </a>
 
-        <a class="role-card" asp-action="RegisterAgent">
+        <a class="role-card" asp-action="RegisterAgent" style="border-bottom:none">
             <div class="role-card__icon"><i class="fa fa-user-tie"></i></div>
             <div class="role-card__body">
                 <div class="role-card__title">Company Agent</div>

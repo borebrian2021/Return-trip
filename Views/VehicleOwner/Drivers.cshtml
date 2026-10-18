@@ -1,0 +1,119 @@
+@model List<DriverRowViewModel>
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Drivers";
+    var filter = ViewData["Filter"] as string;
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-id-card me-2" style="color:#1a3c5e;font-size:20px;"></i>Drivers</h1>
+        <p class="dash-page-header__sub">All drivers registered under your fleet.</p>
+    </div>
+    <div class="dash-page-header__actions">
+        <a asp-action="AddDriver" class="dash-btn dash-btn--primary">
+            <i class="fa fa-plus"></i> Add Driver
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="dash-alert dash-alert--success mb-4">
+        <i class="fa fa-check-circle me-2"></i> @TempData["Success"]
+    </div>
+}
+
+<!-- Filter strip -->
+<div class="listings-stat-strip mb-4">
+    <a asp-action="Drivers" class="listings-stat @(filter == null ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count</span>
+        <span class="listings-stat__label">All</span>
+    </a>
+    <a asp-action="Drivers" asp-route-filter="verified" class="listings-stat @(filter == "verified" ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count(d => d.IsVerified)</span>
+        <span class="listings-stat__label">Verified</span>
+    </a>
+    <a asp-action="Drivers" asp-route-filter="claimed" class="listings-stat @(filter == "claimed" ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count(d => d.HasAccount)</span>
+        <span class="listings-stat__label">Claimed</span>
+    </a>
+    <a asp-action="Drivers" asp-route-filter="unclaimed" class="listings-stat @(filter == "unclaimed" ? "active" : "")">
+        <span class="listings-stat__value">@Model.Count(d => !d.HasAccount)</span>
+        <span class="listings-stat__label">Unclaimed</span>
+    </a>
+</div>
+
+<div class="dash-panel">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title">@(filter != null ? $"Showing: {filter}" : "All Drivers")</h2>
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="dash-empty">
+            <i class="fa fa-id-card"></i>
+            <p>No drivers found. Add a driver to get started.</p>
+            <a asp-action="AddDriver" class="dash-btn dash-btn--primary"><i class="fa fa-plus"></i> Add Driver</a>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>ID Number</th>
+                        <th>Phone</th>
+                        <th>Licence No.</th>
+                        <th>Assigned Vehicle</th>
+                        <th>Account</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model)
+                    {
+                        <tr>
+                            <td class="td-primary">@d.FullName</td>
+                            <td class="td-muted">@d.IdNumber</td>
+                            <td class="td-muted">@d.PhoneNumber</td>
+                            <td class="td-muted">@d.LicenseNumber</td>
+                            <td class="td-muted">@(d.VehicleNumberPlate ?? "Not assigned")</td>
+                            <td>
+                                @if (d.HasAccount)
+                                {
+                                    <span class="dash-stat-card__badge dash-stat-card__badge--green">
+                                        <i class="fa fa-check me-1"></i> Yes
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="dash-stat-card__badge dash-stat-card__badge--amber">
+                                        <i class="fa fa-clock me-1"></i> Pending
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (d.IsVerified)
+                                {
+                                    <span class="status-pill status-pill--accepted">Verified</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill status-pill--pending">Unverified</span>
+                                }
+                            </td>
+                            <td class="td-muted">@d.CreatedAt.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Styles {
+<style>.dash-alert--success { background:#e6f4ee;color:#1a7a45;border:1px solid #b7dfc8; }</style>
+}

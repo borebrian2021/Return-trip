@@ -1,0 +1,70 @@
+@model AgentRoutesPageViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Vehicle Routes";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-route me-2" style="color:#d4890a;font-size:20px;"></i>Vehicle Routes</h1>
+        <p class="dash-page-header__sub">Update the current route and return date for each assigned vehicle.</p>
+    </div>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (!Model.Vehicles.Any())
+{
+    <div class="dash-panel">
+        <div class="dash-empty">
+            <i class="fa fa-truck"></i>
+            <p>No vehicles are currently assigned to your agent profile.</p>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var vehicle in Model.Vehicles)
+    {
+        <div class="dash-panel mb-4">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title">@vehicle.NumberPlate <span class="td-muted">· @vehicle.VehicleType · @vehicle.CompanyName</span></h2>
+            </div>
+            <form asp-action="UpdateRoute" method="post" class="row g-3">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="VehicleId" value="@vehicle.VehicleId" />
+
+                <div class="col-md-6">
+                    <label for="from-@vehicle.VehicleId" class="form-label">From location</label>
+                    <input id="from-@vehicle.VehicleId" name="FromLocation" value="@vehicle.FromLocation" class="form-control" maxlength="300" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label for="to-@vehicle.VehicleId" class="form-label">To location</label>
+                    <input id="to-@vehicle.VehicleId" name="ToLocation" value="@vehicle.ToLocation" class="form-control" maxlength="300" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label for="departure-@vehicle.VehicleId" class="form-label">Departure date</label>
+                    <input id="departure-@vehicle.VehicleId" type="date" name="DepartureDate" value="@vehicle.DepartureDate?.ToString("yyyy-MM-dd")" class="form-control" required />
+                </div>
+
+                <div class="col-md-6">
+                    <label for="return-@vehicle.VehicleId" class="form-label">Return date</label>
+                    <input id="return-@vehicle.VehicleId" type="date" name="ReturnDate" value="@vehicle.ReturnDate?.ToString("yyyy-MM-dd")" class="form-control" required />
+                </div>
+
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update Route</button>
+                </div>
+            </form>
+        </div>
+    }
+}

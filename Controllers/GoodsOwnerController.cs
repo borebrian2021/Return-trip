@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Return_trip.Models;
 
 namespace Return_trip.Controllers;
@@ -11,11 +12,13 @@ public class GoodsOwnerController : Controller
 {
     private readonly SystemDBContext _db;
     private readonly UserManager<UserAccount> _userManager;
+    private readonly IConfiguration _config;
 
-    public GoodsOwnerController(SystemDBContext db, UserManager<UserAccount> userManager)
+    public GoodsOwnerController(SystemDBContext db, UserManager<UserAccount> userManager, IConfiguration config)
     {
         _db = db;
         _userManager = userManager;
+        _config = config;
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -142,6 +145,7 @@ public class GoodsOwnerController : Controller
         var (user, owner) = await GetContextAsync();
         SetLayoutData(user, owner, "post");
         ViewData["Title"] = "Post Cargo";
+        ViewData["GoogleMapsKey"] = _config["GoogleMaps:ApiKey"] ?? string.Empty;
 
         var commission = await _db.AdminCommissionSettings
                              .OrderByDescending(s => s.UpdatedAt)
@@ -150,10 +154,13 @@ public class GoodsOwnerController : Controller
 
         return View(new PostCargoViewModel
         {
-            CommissionPercent    = commission == 0 ? 10m : commission,
-            RetentionPeriodDays  = 7,
+            CommissionPercent     = commission == 0 ? 10m : commission,
+            RetentionPeriodDays   = 7,
             AdvancePaymentPercent = 70m,
-            PricingMode          = "FixedTotal",
+            PricingMode           = "FixedTotal",
+            // pre-fill sender contact from profile
+            SenderContactName     = $"{user.FirstName} {user.LastName}".Trim(),
+            SenderPhone           = user.PhoneNumber ?? string.Empty,
         });
     }
 
@@ -164,27 +171,22 @@ public class GoodsOwnerController : Controller
         var (user, owner) = await GetContextAsync();
         SetLayoutData(user, owner, "post");
         ViewData["Title"] = "Post Cargo";
+        ViewData["GoogleMapsKey"] = _config["GoogleMaps:ApiKey"] ?? string.Empty;
 
-        // cross-field validation
         var ctx = new System.ComponentModel.DataAnnotations.ValidationContext(model);
-        var extraErrors = model.Validate(ctx);
-        foreach (var e in extraErrors)
+        foreach (var e in model.Validate(ctx))
             ModelState.AddModelError(e.MemberNames.FirstOrDefault() ?? string.Empty, e.ErrorMessage ?? "Invalid.");
+
+        var commission = await _db.AdminCommissionSettings
+                             .OrderByDescending(s => s.UpdatedAt)
+                             .Select(s => s.Percentage)
+                             .FirstOrDefaultAsync();
 
         if (!ModelState.IsValid)
         {
-            var commission = await _db.AdminCommissionSettings
-                                 .OrderByDescending(s => s.UpdatedAt)
-                                 .Select(s => s.Percentage)
-                                 .FirstOrDefaultAsync();
             model.CommissionPercent = commission == 0 ? 10m : commission;
             return View(model);
         }
-
-        var commission2 = await _db.AdminCommissionSettings
-                              .OrderByDescending(s => s.UpdatedAt)
-                              .Select(s => s.Percentage)
-                              .FirstOrDefaultAsync();
 
         var cargo = new Cargo
         {
@@ -198,13 +200,27 @@ public class GoodsOwnerController : Controller
                                         ? model.TransportCost!.Value
                                         : model.WeightKg * model.PricePerKg!.Value,
             PricePerKg            = model.PricingMode == "PerKg" ? model.PricePerKg : null,
-            CommissionPercent     = commission2 == 0 ? 10m : commission2,
+            CommissionPercent     = commission == 0 ? 10m : commission,
             RetentionPeriodDays   = model.RetentionPeriodDays,
             AdvancePaymentPercent = model.AdvancePaymentPercent,
             FromLocation          = model.FromLocation.Trim(),
+            FromPlaceId           = model.FromPlaceId,
+            FromLatitude          = model.FromLatitude,
+            FromLongitude         = model.FromLongitude,
             ToLocation            = model.ToLocation.Trim(),
-            RequiredDepartureAt   = model.RequiredDepartureAt,
+            ToPlaceId             = model.ToPlaceId,
+            ToLatitude            = model.ToLatitude,
+            ToLongitude           = model.ToLongitude,
+            DistanceKm            = model.DistanceKm,
+            PickupDateTime        = model.PickupDateTime,
+            PickupDeadlineAt      = model.PickupDeadlineAt,
             DeliveryDeadlineAt    = model.DeliveryDeadlineAt,
+            RequiredDepartureAt   = model.PickupDateTime,   // keep legacy field in sync
+            SenderContactName     = model.SenderContactName.Trim(),
+            SenderPhone           = model.SenderPhone.Trim(),
+            ReceiverName          = model.ReceiverName.Trim(),
+            ReceiverPhone         = model.ReceiverPhone.Trim(),
+            ReceiverEmail         = model.ReceiverEmail?.Trim(),
             Status                = "Open",
             IsBidOpen             = true,
         };

@@ -1,25 +1,60 @@
 ﻿@model ErrorViewModel
+@using Microsoft.AspNetCore.Diagnostics
 @{
     ViewData["Title"] = "Error";
+    var exceptionFeature = Context.Features.Get<IExceptionHandlerPathFeature>();
+    var exception = exceptionFeature?.Error;
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Error – Return Trip</title>
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background:#f0f2f5;padding:40px 20px;">
+<div style="max-width:800px;margin:0 auto;">
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    <div style="background:#fdecea;border:1px solid #f5c6c3;border-radius:12px;padding:28px 32px;margin-bottom:20px;">
+        <h2 style="color:#c0392b;font-size:20px;margin:0 0 6px;">
+            <i class="fa fa-exclamation-circle me-2"></i>An error occurred
+        </h2>
+        <p style="color:#6a6a6a;margin:0;font-size:14px;">
+            Request ID: <code>@Model.RequestId</code>
+        </p>
+    </div>
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+    @if (exception != null)
+    {
+        <div style="background:#fff;border:1px solid #e0e4e3;border-radius:12px;padding:24px 28px;margin-bottom:20px;">
+            <h3 style="font-size:15px;font-weight:700;color:#2f2f2f;margin:0 0 10px;">
+                @exception.GetType().Name
+            </h3>
+            <p style="color:#c0392b;font-size:14px;margin:0 0 16px;">@exception.Message</p>
+
+            @if (exception.InnerException != null)
+            {
+                <div style="background:#f7f9f8;border-radius:8px;padding:14px;margin-bottom:14px;">
+                    <strong style="font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#9a9a9a;">Inner Exception</strong>
+                    <p style="font-size:13px;color:#6a6a6a;margin:6px 0 0;">@exception.InnerException.Message</p>
+                </div>
+            }
+
+            <details style="margin-top:12px;">
+                <summary style="font-size:13px;font-weight:600;color:#1a3c5e;cursor:pointer;">Stack Trace</summary>
+                <pre style="font-size:11px;color:#6a6a6a;background:#f7f9f8;border-radius:8px;padding:14px;margin-top:10px;overflow-x:auto;white-space:pre-wrap;">@exception.StackTrace</pre>
+            </details>
+        </div>
+    }
+
+    <div style="text-align:center;">
+        <a href="/" style="display:inline-block;padding:10px 24px;background:#1a3c5e;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
+            ← Back to Home
+        </a>
+    </div>
+
+</div>
+</body>
+</html>

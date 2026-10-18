@@ -1,0 +1,75 @@
+@model List<CompanyRegistration>
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Companies";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-building me-2" style="color:#d4890a;font-size:20px;"></i>Companies</h1>
+        <p class="dash-page-header__sub">All companies registered under your vehicle owner account.</p>
+    </div>
+</div>
+
+<div class="dash-panel">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title">Registered Companies</h2>
+        <a asp-action="AddCompany" class="btn btn-primary">Register Company</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="dash-empty">
+            <i class="fa fa-building"></i>
+            <p>No companies registered yet. Add your first company to start assigning vehicles.</p>
+            <a asp-action="AddCompany" class="btn btn-primary mt-3">Register Company</a>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Registration No.</th>
+                        <th>Sector</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Certificate</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var company in Model)
+                    {
+                        <tr>
+                            <td class="td-primary">@company.CompanyName</td>
+                            <td class="td-muted">@company.RegistrationNumber</td>
+                            <td class="td-muted">@(company.BusinessSector ?? "Not set")</td>
+                            <td class="td-muted">@company.Email</td>
+                            <td class="td-muted">@company.Phone</td>
+                            <td class="td-muted">@company.Location</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(company.CertificateOfRegistrationUrl))
+                                {
+                                    <a asp-action="DownloadCompanyCertificate" asp-route-id="@company.Id">Download</a>
+                                }
+                                else
+                                {
+                                    <span class="td-muted">Not uploaded</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="status-pill status-pill--@(company.IsApproved ? "accepted" : "pending")">
+                                    @(company.IsApproved ? "Approved" : "Pending")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

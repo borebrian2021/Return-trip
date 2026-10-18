@@ -2,6 +2,7 @@
 @{
     Layout = "_DashboardLayout";
     ViewData["Title"] = "Post Cargo";
+    var googleMapsKey = ViewData["GoogleMapsKey"] as string ?? string.Empty;
 }
 
 <div class="dash-page-header">
@@ -27,6 +28,15 @@
 <form asp-action="PostCargo" method="post" id="postCargoForm">
     @Html.AntiForgeryToken()
 
+    <!-- hidden geo fields populated by Nominatim autocomplete -->
+    <input asp-for="FromPlaceId"            type="hidden" id="FromPlaceId">
+    <input asp-for="FromLatitude"           type="hidden" id="FromLatitude">
+    <input asp-for="FromLongitude"          type="hidden" id="FromLongitude">
+    <input asp-for="ToPlaceId"              type="hidden" id="ToPlaceId">
+    <input asp-for="ToLatitude"             type="hidden" id="ToLatitude">
+    <input asp-for="ToLongitude"            type="hidden" id="ToLongitude">
+    <input asp-for="DistanceAutoCalculated" type="hidden" id="DistanceAutoCalculated">
+
     <div class="row g-4">
 
         <!-- ── Left column ───────────────────────────────────────────────── -->
@@ -35,20 +45,23 @@
             <!-- Cargo details -->
             <div class="dash-panel mb-4">
                 <div class="dash-panel__header">
-                    <h2 class="dash-panel__title"><i class="fa fa-box-open me-2" style="color:#1a3c5e;"></i>Cargo Details</h2>
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-box-open me-2" style="color:#1a3c5e;"></i>Cargo Details
+                    </h2>
                 </div>
                 <div class="post-cargo-body">
 
                     <div class="post-field">
                         <label asp-for="Title">Cargo Title</label>
-                        <input asp-for="Title" class="form-control" placeholder="e.g. Construction sand – 20 tons" />
+                        <input asp-for="Title" class="form-control"
+                               placeholder="e.g. Construction sand – 20 tons" />
                         <span asp-validation-for="Title" class="post-field-error"></span>
                     </div>
 
                     <div class="post-field">
                         <label asp-for="Description">Description</label>
                         <textarea asp-for="Description" class="form-control" rows="3"
-                                  placeholder="Additional details about the cargo, handling requirements, special instructions…"></textarea>
+                                  placeholder="Additional details, handling requirements, special instructions…"></textarea>
                         <span asp-validation-for="Description" class="post-field-error"></span>
                     </div>
 
@@ -56,7 +69,7 @@
                         <div class="col-md-6">
                             <div class="post-field">
                                 <label asp-for="PackageType">Package / Cargo Type</label>
-                                <select asp-for="PackageType" class="form-control">
+                                <select asp-for="PackageType" class="form-control" id="PackageTypeSelect">
                                     <option value="">— Select type —</option>
                                     <optgroup label="Bulk">
                                         <option value="Bulk – Loose">Bulk – Loose</option>
@@ -80,7 +93,16 @@
                                 </select>
                                 <span asp-validation-for="PackageType" class="post-field-error"></span>
                             </div>
+
+                            <!-- "Other" free-text input — shown only when Other is selected -->
+                            <div class="post-field d-none" id="otherTypeWrap">
+                                <label for="OtherPackageType">Describe cargo type</label>
+                                <input type="text" id="OtherPackageType" class="form-control"
+                                       placeholder="e.g. Timber offcuts" maxlength="150" />
+                                <small>This will be saved as the cargo type.</small>
+                            </div>
                         </div>
+
                         <div class="col-md-6">
                             <div class="post-field">
                                 <label asp-for="WeightKg">Weight (kg)</label>
@@ -97,7 +119,9 @@
             <!-- Route -->
             <div class="dash-panel mb-4">
                 <div class="dash-panel__header">
-                    <h2 class="dash-panel__title"><i class="fa fa-route me-2" style="color:#0e7490;"></i>Route</h2>
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-route me-2" style="color:#0e7490;"></i>Route &amp; Distance
+                    </h2>
                 </div>
                 <div class="post-cargo-body">
                     <div class="row g-3">
@@ -106,8 +130,13 @@
                                 <label asp-for="FromLocation">
                                     <i class="fa fa-map-marker-alt me-1" style="color:#1a3c5e;"></i>Pickup Location
                                 </label>
-                                <input asp-for="FromLocation" class="form-control"
-                                       placeholder="e.g. Johannesburg, Gauteng" />
+                                <div class="location-input-wrap">
+                                    <input asp-for="FromLocation" class="form-control location-autocomplete"
+                                           id="FromLocation" autocomplete="off"
+                                           placeholder="Start typing a city or address…" />
+                                    <i class="fa fa-search location-input-icon"></i>
+                                </div>
+                                <small>Type to search or enter manually.</small>
                                 <span asp-validation-for="FromLocation" class="post-field-error"></span>
                             </div>
                         </div>
@@ -116,28 +145,163 @@
                                 <label asp-for="ToLocation">
                                     <i class="fa fa-map-marker-alt me-1" style="color:#c0392b;"></i>Delivery Location
                                 </label>
-                                <input asp-for="ToLocation" class="form-control"
-                                       placeholder="e.g. Cape Town, Western Cape" />
+                                <div class="location-input-wrap">
+                                    <input asp-for="ToLocation" class="form-control location-autocomplete"
+                                           id="ToLocation" autocomplete="off"
+                                           placeholder="Start typing a city or address…" />
+                                    <i class="fa fa-search location-input-icon"></i>
+                                </div>
+                                <small>Type to search or enter manually.</small>
                                 <span asp-validation-for="ToLocation" class="post-field-error"></span>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Distance row -->
+                    <div class="row g-3 mt-1" id="distance-row">
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="DistanceKm">
+                                    <i class="fa fa-road me-1" style="color:#0e7490;"></i>Distance (km)
+                                </label>
+                                <div class="input-with-prefix">
+                                    <span class="input-prefix" style="font-size:11px;font-weight:600;">km</span>
+                                    <input asp-for="DistanceKm" class="form-control" type="number"
+                                           id="DistanceKm" min="0.1" step="0.1"
+                                           placeholder="e.g. 475" style="padding-left:38px;" />
+                                </div>
+                                <small id="distance-hint">
+                                    Enter distance manually, or select both locations from the dropdown to auto-calculate.
+                                </small>
+                                <span asp-validation-for="DistanceKm" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div id="distance-auto-badge" class="d-none"
+                                 style="background:#e6f4ee;border-radius:8px;padding:10px 14px;font-size:12px;color:#1a7a45;width:100%;">
+                                <i class="fa fa-check-circle me-2"></i>
+                                <strong>Auto-calculated</strong> from map coordinates.
+                                <a href="#" id="override-distance" style="color:#1a3c5e;font-size:11px;margin-left:6px;">Override</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="dash-panel mb-4">
+                <div class="dash-panel__header">
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-clock me-2" style="color:#7c3aed;"></i>Schedule &amp; Deadlines
+                    </h2>
+                </div>
+                <div class="post-cargo-body">
+                    <div class="schedule-urgent-notice">
+                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        All times are critical — especially for perishable goods. Missed pickups may result in bid cancellation.
+                    </div>
+
                     <div class="row g-3 mt-1">
                         <div class="col-md-6">
                             <div class="post-field">
-                                <label asp-for="RequiredDepartureAt">Required Departure Date</label>
-                                <input asp-for="RequiredDepartureAt" class="form-control" type="date"
-                                       min="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                                <span asp-validation-for="RequiredDepartureAt" class="post-field-error"></span>
+                                <label asp-for="PickupDateTime">
+                                    <i class="fa fa-calendar-check me-1" style="color:#1a3c5e;"></i>
+                                    Scheduled Pickup Date &amp; Time <span style="color:#c0392b;">*</span>
+                                </label>
+                                <input asp-for="PickupDateTime" class="form-control" type="datetime-local"
+                                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                                <small>Exact time you need the driver to collect the cargo.</small>
+                                <span asp-validation-for="PickupDateTime" class="post-field-error"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="post-field">
-                                <label asp-for="DeliveryDeadlineAt">Delivery Deadline</label>
-                                <input asp-for="DeliveryDeadlineAt" class="form-control" type="date"
-                                       min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                <label asp-for="PickupDeadlineAt">
+                                    <i class="fa fa-exclamation-circle me-1" style="color:#c0392b;"></i>
+                                    Latest Pickup By (Hard Deadline) <span style="color:#c0392b;">*</span>
+                                </label>
+                                <input asp-for="PickupDeadlineAt" class="form-control" type="datetime-local"
+                                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                                <small>After this time the listing may be reopened for rebidding.</small>
+                                <span asp-validation-for="PickupDeadlineAt" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="DeliveryDeadlineAt">
+                                    <i class="fa fa-flag-checkered me-1" style="color:#0e7490;"></i>
+                                    Delivery Must Complete By
+                                </label>
+                                <input asp-for="DeliveryDeadlineAt" class="form-control" type="datetime-local"
+                                       min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                                <small>Optional — set for time-sensitive or perishable cargo.</small>
                                 <span asp-validation-for="DeliveryDeadlineAt" class="post-field-error"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contacts -->
+            <div class="dash-panel mb-4">
+                <div class="dash-panel__header">
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-address-book me-2" style="color:#1a3c5e;"></i>Contacts
+                    </h2>
+                </div>
+                <div class="post-cargo-body">
+
+                    <div class="contacts-section-label">
+                        <i class="fa fa-user me-2" style="color:#1a3c5e;"></i>Sender (Your Details)
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="SenderContactName">Contact Name</label>
+                                <input asp-for="SenderContactName" class="form-control"
+                                       placeholder="Full name" autocomplete="name" />
+                                <span asp-validation-for="SenderContactName" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="SenderPhone">Phone Number</label>
+                                <input asp-for="SenderPhone" class="form-control" type="tel"
+                                       placeholder="+254 7xx xxx xxx" autocomplete="tel" />
+                                <span asp-validation-for="SenderPhone" class="post-field-error"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contacts-section-label mt-3">
+                        <i class="fa fa-user-check me-2" style="color:#0e7490;"></i>Receiver at Destination
+                        <span class="contacts-reveal-note">
+                            <i class="fa fa-lock me-1"></i>Revealed to driver only after 70% advance payment
+                        </span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="post-field">
+                                <label asp-for="ReceiverName">Receiver Name</label>
+                                <input asp-for="ReceiverName" class="form-control"
+                                       placeholder="Full name of person receiving" />
+                                <span asp-validation-for="ReceiverName" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="post-field">
+                                <label asp-for="ReceiverPhone">Receiver Phone</label>
+                                <input asp-for="ReceiverPhone" class="form-control" type="tel"
+                                       placeholder="+254 7xx xxx xxx" />
+                                <span asp-validation-for="ReceiverPhone" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="post-field">
+                                <label asp-for="ReceiverEmail">Receiver Email <small style="font-weight:400;text-transform:none;">(optional)</small></label>
+                                <input asp-for="ReceiverEmail" class="form-control" type="email"
+                                       placeholder="receiver@example.com" />
+                                <span asp-validation-for="ReceiverEmail" class="post-field-error"></span>
                             </div>
                         </div>
                     </div>
@@ -147,11 +311,12 @@
             <!-- Pricing -->
             <div class="dash-panel mb-4">
                 <div class="dash-panel__header">
-                    <h2 class="dash-panel__title"><i class="fa fa-coins me-2" style="color:#d4890a;"></i>Pricing</h2>
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-coins me-2" style="color:#d4890a;"></i>Pricing
+                    </h2>
                 </div>
                 <div class="post-cargo-body">
 
-                    <!-- pricing mode toggle -->
                     <div class="post-field">
                         <label>Pricing Mode</label>
                         <div class="pricing-mode-toggle">
@@ -171,11 +336,12 @@
                     <!-- fixed total -->
                     <div id="field-fixed" class="@(Model.PricingMode == "FixedTotal" ? "" : "d-none")">
                         <div class="post-field">
-                            <label asp-for="TransportCost">Total Transport Cost (R)</label>
+                            <label asp-for="TransportCost">Total Transport Cost (KSh)</label>
                             <div class="input-with-prefix">
-                                <span class="input-prefix">R</span>
+                                <span class="input-prefix">KSh</span>
                                 <input asp-for="TransportCost" class="form-control" type="number"
-                                       min="0.01" step="0.01" placeholder="e.g. 8500.00" />
+                                       min="0.01" step="0.01" placeholder="e.g. 8500.00"
+                                       style="padding-left:46px;" />
                             </div>
                             <span asp-validation-for="TransportCost" class="post-field-error"></span>
                         </div>
@@ -186,11 +352,12 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="post-field">
-                                    <label asp-for="PricePerKg">Price Per Kg (R)</label>
+                                    <label asp-for="PricePerKg">Price Per Kg (KSh)</label>
                                     <div class="input-with-prefix">
-                                        <span class="input-prefix">R</span>
+                                        <span class="input-prefix">KSh</span>
                                         <input asp-for="PricePerKg" class="form-control" type="number"
-                                               min="0.01" step="0.01" placeholder="e.g. 0.60" />
+                                               min="0.01" step="0.01" placeholder="e.g. 0.60"
+                                               style="padding-left:46px;" />
                                     </div>
                                     <span asp-validation-for="PricePerKg" class="post-field-error"></span>
                                 </div>
@@ -204,11 +371,10 @@
                         </div>
                     </div>
 
-                    <!-- commission info -->
                     <div class="post-commission-info">
                         <i class="fa fa-info-circle me-2"></i>
                         Platform commission: <strong>@Model.CommissionPercent%</strong>.
-                        This is deducted from the transport cost before payment is released to the vehicle owner.
+                        Deducted before payment is released to the vehicle owner.
                     </div>
 
                 </div>
@@ -216,24 +382,28 @@
 
         </div>
 
-        <!-- ── Right column (payment terms + summary) ────────────────────── -->
+        <!-- ── Right column ───────────────────────────────────────────────── -->
         <div class="col-lg-4">
 
             <!-- Payment terms -->
             <div class="dash-panel mb-4">
                 <div class="dash-panel__header">
-                    <h2 class="dash-panel__title"><i class="fa fa-shield-alt me-2" style="color:#7c3aed;"></i>Payment Terms</h2>
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-shield-alt me-2" style="color:#7c3aed;"></i>Payment Terms
+                    </h2>
                 </div>
                 <div class="post-cargo-body">
 
                     <div class="post-field">
                         <label asp-for="AdvancePaymentPercent">
-                            Advance to Driver on Departure (%)
+                            Advance to Driver on Departure
                         </label>
-                        <input asp-for="AdvancePaymentPercent" class="form-control" type="number"
-                               min="1" max="100" step="1" />
-                        <small>Percentage of transport cost paid upfront when cargo departs.</small>
-                        <span asp-validation-for="AdvancePaymentPercent" class="post-field-error"></span>
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">%</span>
+                            <input asp-for="AdvancePaymentPercent" class="form-control"
+                                   value="70" readonly style="padding-left:30px;background:#f7f9f8;color:#1a3c5e;font-weight:700;" />
+                        </div>
+                        <small>Fixed at 70% — paid upfront when cargo departs.</small>
                     </div>
 
                     <div class="post-field">
@@ -242,17 +412,19 @@
                         </label>
                         <input asp-for="RetentionPeriodDays" class="form-control" type="number"
                                min="1" max="90" step="1" />
-                        <small>Remaining balance held for this many days after delivery before release.</small>
+                        <small>Remaining 30% held for this many days after delivery before ofloading.</small>
                         <span asp-validation-for="RetentionPeriodDays" class="post-field-error"></span>
                     </div>
 
                 </div>
             </div>
 
-            <!-- Summary card -->
-            <div class="dash-panel post-summary-card">
+            <!-- Summary -->
+            <div class="dash-panel post-summary-card mb-4">
                 <div class="dash-panel__header">
-                    <h2 class="dash-panel__title"><i class="fa fa-receipt me-2" style="color:#1a3c5e;"></i>Summary</h2>
+                    <h2 class="dash-panel__title">
+                        <i class="fa fa-receipt me-2" style="color:#1a3c5e;"></i>Summary
+                    </h2>
                 </div>
                 <div class="post-cargo-body">
                     <div class="summary-row">
@@ -272,7 +444,7 @@
                         <strong id="sum-cost">—</strong>
                     </div>
                     <div class="summary-row">
-                        <span>Platform commission (@Model.CommissionPercent%)</span>
+                        <span>Commission (@Model.CommissionPercent%)</span>
                         <strong id="sum-commission" style="color:#c0392b;">—</strong>
                     </div>
                     <div class="summary-row summary-row--total">
@@ -280,7 +452,7 @@
                         <strong id="sum-net">—</strong>
                     </div>
                     <div class="summary-row">
-                        <span>Advance on departure</span>
+                        <span>Advance on departure (70%)</span>
                         <strong id="sum-advance">—</strong>
                     </div>
                     <div class="summary-row">
@@ -291,14 +463,14 @@
             </div>
 
             <!-- Submit -->
-            <div class="mt-3">
-                <button type="submit" class="dash-btn dash-btn--primary w-100" style="justify-content:center;padding:14px 0;font-size:15px;">
-                    <i class="fa fa-paper-plane me-2"></i>Post Cargo Listing
-                </button>
-                <a asp-action="Dashboard" class="dash-btn dash-btn--outline w-100 mt-2" style="justify-content:center;">
-                    Cancel
-                </a>
-            </div>
+            <button type="submit" class="dash-btn dash-btn--primary w-100"
+                    style="justify-content:center;padding:14px 0;font-size:15px;">
+                <i class="fa fa-paper-plane me-2"></i>Post Cargo Listing
+            </button>
+            <a asp-action="Dashboard" class="dash-btn dash-btn--outline w-100 mt-2"
+               style="justify-content:center;">
+                Cancel
+            </a>
 
         </div>
     </div>
@@ -306,7 +478,6 @@
 
 @section Styles {
 <style>
-/* post cargo layout */
 .post-cargo-body { padding: 20px 22px 24px; }
 .post-field { margin-bottom: 18px; }
 .post-field label {
@@ -330,9 +501,35 @@
     box-shadow: 0 0 0 3px rgba(26,60,94,.08);
 }
 .post-field-error { font-size: 12px; color: #c0392b; margin-top: 4px; display: block; }
-.post-field small { display: block; font-size: 11px; color: #b0b0b0; margin-top: 4px; }
+.post-field small  { display: block; font-size: 11px; color: #b0b0b0; margin-top: 4px; }
 
-/* pricing mode toggle */
+/* location input */
+.location-input-wrap { position: relative; }
+.location-input-wrap .form-control { padding-right: 36px; }
+.location-input-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0b0b0;
+    font-size: 13px;
+    pointer-events: none;
+}
+/* Google autocomplete dropdown matches our style */
+.pac-container {
+    border-radius: 8px;
+    border: 1.5px solid #e0e4e3;
+    box-shadow: 0 8px 24px rgba(0,0,0,.1);
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    margin-top: 2px;
+}
+.pac-item { padding: 8px 12px; cursor: pointer; }
+.pac-item:hover, .pac-item-selected { background: #eef3f7; }
+.pac-item-query { font-weight: 600; color: #2f2f2f; }
+.pac-matched { color: #1a3c5e; }
+
+/* pricing toggle */
 .pricing-mode-toggle { display: flex; gap: 10px; }
 .pricing-mode-option {
     flex: 1;
@@ -349,28 +546,23 @@
     transition: .2s;
 }
 .pricing-mode-option small { font-size: 11px; font-weight: 400; color: #b0b0b0; }
-.pricing-mode-option.selected {
-    border-color: #1a3c5e;
-    background: #eef3f7;
-    color: #1a3c5e;
-}
+.pricing-mode-option.selected { border-color: #1a3c5e; background: #eef3f7; color: #1a3c5e; }
 .pricing-mode-option.selected small { color: #5a7a9a; }
 
-/* input with prefix */
+/* input prefix */
 .input-with-prefix { position: relative; }
 .input-prefix {
     position: absolute;
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #9a9a9a;
     z-index: 2;
+    white-space: nowrap;
 }
-.input-with-prefix .form-control { padding-left: 28px; }
 
-/* commission info */
 .post-commission-info {
     background: #eef3f7;
     border-radius: 8px;
@@ -380,7 +572,7 @@
     margin-top: 4px;
 }
 
-/* summary card */
+/* summary */
 .summary-row {
     display: flex;
     justify-content: space-between;
@@ -396,8 +588,6 @@
     background: #f7f9f8;
     margin: 4px -22px;
     padding: 10px 22px;
-    font-weight: 700;
-    color: #2f2f2f;
     border-bottom: none;
 }
 .summary-row--total strong { color: #1a3c5e; font-size: 15px; font-weight: 800; }
@@ -408,9 +598,9 @@
     height: 44px;
     display: flex;
     align-items: center;
+    padding-left: 12px;
 }
 
-/* alert */
 .dash-alert { display: flex; align-items: flex-start; gap: 10px; padding: 14px 18px;
     border-radius: 10px; font-size: 13px; }
 .dash-alert--error { background: #fdecea; color: #c0392b; border: 1px solid #f5c6c3; }
@@ -419,9 +609,154 @@
 
 @section Scripts {
 <partial name="_ValidationScriptsPartial" />
+
+<!-- Nominatim (OpenStreetMap) autocomplete — no API key required -->
+<script>
+(function () {
+    // ── Nominatim autocomplete factory ───────────────────────────────────────
+    function makeAutocomplete(inputId, placeIdField, latField, lngField, onSelected) {
+        const input     = document.getElementById(inputId);
+        const placeEl   = document.getElementById(placeIdField);
+        const latEl     = document.getElementById(latField);
+        const lngEl     = document.getElementById(lngField);
+
+        // create dropdown container
+        const dropdown = document.createElement('ul');
+        dropdown.className = 'nominatim-dropdown';
+        input.parentNode.appendChild(dropdown);
+
+        let debounceTimer;
+
+        input.addEventListener('input', function () {
+            // clear geo fields on manual edit
+            placeEl.value = '';
+            latEl.value   = '';
+            lngEl.value   = '';
+
+            const q = this.value.trim();
+            clearTimeout(debounceTimer);
+
+            if (q.length < 3) { dropdown.innerHTML = ''; dropdown.style.display = 'none'; return; }
+
+            debounceTimer = setTimeout(function () {
+                fetch('https://nominatim.openstreetmap.org/search?format=json&limit=6&addressdetails=1&q=' +
+                      encodeURIComponent(q), {
+                    headers: { 'Accept-Language': 'en' }
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (results) {
+                    dropdown.innerHTML = '';
+                    if (!results.length) { dropdown.style.display = 'none'; return; }
+
+                    results.forEach(function (place) {
+                        const li = document.createElement('li');
+                        li.className = 'nominatim-item';
+                        // show a short version: first two parts of display_name
+                        const parts = place.display_name.split(',');
+                        const short = parts.slice(0, 3).join(',').trim();
+                        li.innerHTML =
+                            '<span class="nominatim-primary">' + (parts[0] || '').trim() + '</span>' +
+                            '<span class="nominatim-secondary">' + parts.slice(1, 3).join(',').trim() + '</span>';
+                        li.addEventListener('mousedown', function (e) {
+                            e.preventDefault(); // stop blur firing before click
+                            input.value   = short;
+                            placeEl.value = place.osm_type + '/' + place.osm_id;
+                            latEl.value   = place.lat;
+                            lngEl.value   = place.lon;
+                            dropdown.innerHTML = '';
+                            dropdown.style.display = 'none';
+                            if (typeof updateSummary === 'function') updateSummary();
+                            if (typeof onSelected === 'function') onSelected();
+                        });
+                        dropdown.appendChild(li);
+                    });
+                    dropdown.style.display = 'block';
+                })
+                .catch(function () { dropdown.style.display = 'none'; });
+            }, 350); // debounce 350ms — be polite to Nominatim
+        });
+
+        // hide on blur
+        input.addEventListener('blur', function () {
+            setTimeout(function () { dropdown.style.display = 'none'; }, 200);
+        });
+        input.addEventListener('focus', function () {
+            if (dropdown.children.length) dropdown.style.display = 'block';
+        });
+    }
+
+    // ── Auto-calculate distance using Haversine formula ─────────────────────
+    function haversineKm(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function tryAutoDistance() {
+        const lat1 = parseFloat(document.getElementById('FromLatitude').value);
+        const lng1 = parseFloat(document.getElementById('FromLongitude').value);
+        const lat2 = parseFloat(document.getElementById('ToLatitude').value);
+        const lng2 = parseFloat(document.getElementById('ToLongitude').value);
+        if (!isNaN(lat1) && !isNaN(lng1) && !isNaN(lat2) && !isNaN(lng2)) {
+            const km = haversineKm(lat1, lng1, lat2, lng2);
+            document.getElementById('DistanceKm').value = Math.round(km * 10) / 10;
+            document.getElementById('DistanceAutoCalculated').value = 'true';
+            document.getElementById('distance-auto-badge').classList.remove('d-none');
+            document.getElementById('distance-hint').classList.add('d-none');
+        }
+    }
+
+    document.getElementById('override-distance')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('DistanceKm').value = '';
+        document.getElementById('DistanceAutoCalculated').value = 'false';
+        document.getElementById('distance-auto-badge').classList.add('d-none');
+        document.getElementById('distance-hint').classList.remove('d-none');
+        document.getElementById('DistanceKm').focus();
+    });
+
+    // init both location fields
+    makeAutocomplete('FromLocation', 'FromPlaceId', 'FromLatitude', 'FromLongitude', tryAutoDistance);
+    makeAutocomplete('ToLocation',   'ToPlaceId',   'ToLatitude',   'ToLongitude',   tryAutoDistance);
+})();
+</script>
+
 <script>
 (function () {
     const commissionRate = @Model.CommissionPercent / 100;
+
+    // ── "Other" cargo type ───────────────────────────────────────────────────
+    const pkgSelect   = document.getElementById('PackageTypeSelect');
+    const otherWrap   = document.getElementById('otherTypeWrap');
+    const otherInput  = document.getElementById('OtherPackageType');
+    const pkgHidden   = document.getElementById('PackageType'); // the actual bound input
+
+    pkgSelect.addEventListener('change', function () {
+        const isOther = this.value === 'Other';
+        otherWrap.classList.toggle('d-none', !isOther);
+        if (isOther) {
+            otherInput.focus();
+        }
+        updateSummary();
+    });
+
+    otherInput.addEventListener('input', function () {
+        // write the custom value back into the bound select so model binding picks it up
+        let opt = pkgSelect.querySelector('option[value="__custom__"]');
+        if (!opt) {
+            opt = document.createElement('option');
+            opt.value = '__custom__';
+            pkgSelect.appendChild(opt);
+        }
+        opt.value = this.value;
+        opt.textContent = this.value;
+        pkgSelect.value = this.value;
+        updateSummary();
+    });
 
     // ── Pricing mode toggle ──────────────────────────────────────────────────
     document.querySelectorAll('.pricing-radio').forEach(function (radio) {
@@ -430,7 +765,6 @@
                 el.classList.remove('selected');
             });
             this.closest('.pricing-mode-option').classList.add('selected');
-
             const isFixed = this.value === 'FixedTotal';
             document.getElementById('field-fixed').classList.toggle('d-none', !isFixed);
             document.getElementById('field-perkg').classList.toggle('d-none', isFixed);
@@ -443,38 +777,40 @@
         const mode = document.querySelector('.pricing-radio:checked')?.value ?? 'FixedTotal';
         if (mode === 'FixedTotal') {
             return parseFloat(document.getElementById('TransportCost')?.value) || 0;
-        } else {
-            const pkg = parseFloat(document.getElementById('PricePerKg')?.value) || 0;
-            const wt  = parseFloat(document.getElementById('WeightKg')?.value)   || 0;
-            return pkg * wt;
         }
+        const pkg = parseFloat(document.getElementById('PricePerKg')?.value) || 0;
+        const wt  = parseFloat(document.getElementById('WeightKg')?.value)   || 0;
+        return pkg * wt;
     }
 
-    function fmt(v) { return v > 0 ? 'R ' + v.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'; }
+    function fmt(v) {
+        return v > 0
+            ? 'KSh ' + v.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : '—';
+    }
 
     function updateSummary() {
         const cost       = getCost();
         const commission = cost * commissionRate;
         const net        = cost - commission;
-        const advPct     = parseFloat(document.getElementById('AdvancePaymentPercent')?.value) || 70;
-        const advance    = net * advPct / 100;
+        const advance    = net * 0.70;
         const balance    = net - advance;
 
         const from = document.getElementById('FromLocation')?.value.trim();
         const to   = document.getElementById('ToLocation')?.value.trim();
         const wt   = parseFloat(document.getElementById('WeightKg')?.value) || 0;
-        const type = document.getElementById('PackageType')?.value || '';
+        const type = pkgSelect?.value || '';
+        const displayType = type === '' ? '—' : type;
 
-        document.getElementById('sum-type').textContent    = type || '—';
-        document.getElementById('sum-weight').textContent  = wt > 0 ? wt.toLocaleString('en-ZA') + ' kg' : '—';
-        document.getElementById('sum-route').textContent   = (from && to) ? from + ' → ' + to : '—';
-        document.getElementById('sum-cost').textContent    = fmt(cost);
+        document.getElementById('sum-type').textContent      = displayType;
+        document.getElementById('sum-weight').textContent    = wt > 0 ? wt.toLocaleString('en-KE') + ' kg' : '—';
+        document.getElementById('sum-route').textContent     = (from && to) ? from + ' → ' + to : '—';
+        document.getElementById('sum-cost').textContent      = fmt(cost);
         document.getElementById('sum-commission').textContent = cost > 0 ? '–' + fmt(commission) : '—';
-        document.getElementById('sum-net').textContent     = fmt(net);
-        document.getElementById('sum-advance').textContent = net > 0 ? fmt(advance) + ' (' + advPct + '%)' : '—';
-        document.getElementById('sum-balance').textContent = fmt(balance);
+        document.getElementById('sum-net').textContent       = fmt(net);
+        document.getElementById('sum-advance').textContent   = net > 0 ? fmt(advance) : '—';
+        document.getElementById('sum-balance').textContent   = fmt(balance);
 
-        // per-kg calculated total
         const calcEl = document.getElementById('calcTotal');
         if (calcEl) {
             const mode = document.querySelector('.pricing-radio:checked')?.value;
@@ -483,13 +819,14 @@
     }
 
     // attach listeners
-    ['TransportCost','PricePerKg','WeightKg','FromLocation','ToLocation',
-     'PackageType','AdvancePaymentPercent'].forEach(function (id) {
+    ['TransportCost','PricePerKg','WeightKg','RetentionPeriodDays'].forEach(function (id) {
         document.getElementById(id)?.addEventListener('input', updateSummary);
     });
-    document.getElementById('PackageType')?.addEventListener('change', updateSummary);
+    pkgSelect?.addEventListener('change', updateSummary);
 
-    // run once on load
+    // location fields accept both dropdown selection and plain text
+
+
     updateSummary();
 })();
 </script>

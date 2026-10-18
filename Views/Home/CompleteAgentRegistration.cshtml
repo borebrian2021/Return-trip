@@ -32,6 +32,13 @@
             </div>
             <div class="col-12">
                 <div class="auth-field">
+                    <label asp-for="IdNumber">National ID Number</label>
+                    <input asp-for="IdNumber" class="form-control" readonly />
+                    <span asp-validation-for="IdNumber" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="auth-field">
                     <label asp-for="Email">Email Address</label>
                     <input asp-for="Email" class="form-control" type="email" readonly autocomplete="email" />
                     <span asp-validation-for="Email" class="text-danger"></span>

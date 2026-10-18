@@ -188,15 +188,17 @@ public class HomeController : Controller
             return View(model);
         }
 
-        var agent = await _db.CompanyAgents.SingleOrDefaultAsync(a => a.Email == model.Email.Trim());
-        if (agent is null || agent.UserAccountId.HasValue || !agent.IsActive)
+        var agent = await _db.CompanyAgents.SingleOrDefaultAsync(a => a.IdNumber == model.IdNumber.Trim());
+        if (agent is null || agent.UserAccountId.HasValue || !agent.IsActive ||
+            !string.Equals(agent.Email.Trim(), model.Email.Trim(), StringComparison.OrdinalIgnoreCase))
         {
-            ModelState.AddModelError(nameof(model.Email), "No unclaimed agent profile matches this email. Ask your vehicle owner to register your details first.");
+            ModelState.AddModelError(nameof(model.IdNumber), "No unclaimed agent profile matches that ID number and email. Ask your vehicle owner to check your registered details.");
             return View(model);
         }
 
         return View("CompleteAgentRegistration", new AgentClaimViewModel
         {
+            IdNumber = agent.IdNumber!,
             Email = agent.Email,
             ProfileName = agent.FullName
         });
@@ -358,9 +360,16 @@ public class HomeController : Controller
         }
 
         var email = model.Email.Trim();
+        var idNumber = model.IdNumber.Trim();
         if (await _db.CompanyAgents.AnyAsync(a => a.Email == email))
         {
             ModelState.AddModelError(nameof(model.Email), "An agent profile with this email is already registered.");
+            return View(model);
+        }
+
+        if (await _db.CompanyAgents.AnyAsync(a => a.IdNumber == idNumber))
+        {
+            ModelState.AddModelError(nameof(model.IdNumber), "An agent profile with this ID number is already registered.");
             return View(model);
         }
 
@@ -375,13 +384,14 @@ public class HomeController : Controller
         {
             VehicleOwnerId = vehicleOwner.Id,
             FullName = model.FullName.Trim(),
+            IdNumber = idNumber,
             Email = email,
             PhoneNumber = model.PhoneNumber.Trim(),
             IsActive = true
         });
         await _db.SaveChangesAsync();
 
-        TempData["RegistrationSuccess"] = "Agent details saved. The agent can now claim the profile with the registered email and set a password.";
+        TempData["RegistrationSuccess"] = "Agent details saved. The agent can claim the profile with their ID number and registered email, then set a password.";
         return RedirectToAction(nameof(RegisterSuccess), new { role = "Agent profile" });
     }
 
@@ -443,10 +453,14 @@ public class HomeController : Controller
         }
 
         var agent = await _db.CompanyAgents.SingleOrDefaultAsync(a =>
-            a.Email == model.Email.Trim() && a.IsActive);
+            a.IdNumber == model.IdNumber.Trim() && a.IsActive);
+        if (agent != null && !string.Equals(agent.Email.Trim(), model.Email.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            agent = null;
+        }
         if (agent is null || agent.UserAccountId.HasValue)
         {
-            ModelState.AddModelError(string.Empty, "This agent profile is unavailable. Check the email or contact the vehicle owner.");
+            ModelState.AddModelError(string.Empty, "This agent profile is unavailable. Check your ID number and registered email or contact the vehicle owner.");
             return View("CompleteAgentRegistration", model);
         }
 

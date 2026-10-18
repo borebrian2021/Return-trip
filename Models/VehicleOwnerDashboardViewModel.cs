@@ -21,6 +21,8 @@ public class VehicleOwnerDashboardViewModel
     // recent drivers
     public List<DriverRowViewModel>  RecentDrivers  { get; set; } = new();
 
+    public List<Return_trip.Models.OwnerVehicleRouteViewModel> CurrentRoutes { get; set; } = new();
+
     // recent agents
     public List<AgentRowViewModel>   RecentAgents   { get; set; } = new();
 
@@ -48,6 +50,7 @@ public class AgentRowViewModel
 {
     public int      Id             { get; set; }
     public string   FullName       { get; set; } = string.Empty;
+    public string   IdNumber       { get; set; } = string.Empty;
     public string   Email          { get; set; } = string.Empty;
     public string   PhoneNumber    { get; set; } = string.Empty;
     public bool     IsActive       { get; set; }

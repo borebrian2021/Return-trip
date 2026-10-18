@@ -228,7 +228,13 @@ public class AgentVehicleRouteViewModel
     public string NumberPlate { get; set; } = string.Empty;
     public string CompanyName { get; set; } = string.Empty;
     public string? FromLocation { get; set; }
+    public string? FromPlaceId { get; set; }
+    public decimal? FromLatitude { get; set; }
+    public decimal? FromLongitude { get; set; }
     public string? ToLocation { get; set; }
+    public string? ToPlaceId { get; set; }
+    public decimal? ToLatitude { get; set; }
+    public decimal? ToLongitude { get; set; }
     public DateTime? DepartureDate { get; set; }
     public DateTime? ReturnDate { get; set; }
 }
@@ -242,9 +248,27 @@ public class AgentRouteUpdateViewModel
     [Display(Name = "From location")]
     public string FromLocation { get; set; } = string.Empty;
 
+    [MaxLength(200)]
+    public string? FromPlaceId { get; set; }
+
+    [Range(-90, 90)]
+    public decimal? FromLatitude { get; set; }
+
+    [Range(-180, 180)]
+    public decimal? FromLongitude { get; set; }
+
     [Required, MaxLength(300)]
     [Display(Name = "To location")]
     public string ToLocation { get; set; } = string.Empty;
+
+    [MaxLength(200)]
+    public string? ToPlaceId { get; set; }
+
+    [Range(-90, 90)]
+    public decimal? ToLatitude { get; set; }
+
+    [Range(-180, 180)]
+    public decimal? ToLongitude { get; set; }
 
     [Required, DataType(DataType.Date)]
     [Display(Name = "Departure date")]
@@ -253,6 +277,38 @@ public class AgentRouteUpdateViewModel
     [Required, DataType(DataType.Date)]
     [Display(Name = "Return date")]
     public DateTime? ReturnDate { get; set; }
+}
+
+public class OwnerFleetRoutesViewModel
+{
+    public List<OwnerVehicleRouteViewModel> Vehicles { get; set; } = new();
+}
+
+public class OwnerVehicleRouteViewModel
+{
+    public int VehicleId { get; set; }
+    public string NumberPlate { get; set; } = string.Empty;
+    public string VehicleType { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
+    public string? FromLocation { get; set; }
+    public string? ToLocation { get; set; }
+    public DateTime? DepartureDate { get; set; }
+    public DateTime? ReturnDate { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+}
+
+public class AvailableVehicleSuggestionViewModel
+{
+    public string NumberPlate { get; set; } = string.Empty;
+    public string VehicleType { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
+    public string FromLocation { get; set; } = string.Empty;
+    public string ToLocation { get; set; } = string.Empty;
+    public string Direction { get; set; } = "Outbound";
+    public decimal PickupDistanceKm { get; set; }
+    public decimal DeliveryDistanceKm { get; set; }
+    public DateTime DepartureDate { get; set; }
+    public DateTime ReturnDate { get; set; }
 }
 
 public class LoginViewModel
@@ -276,6 +332,10 @@ public class AgentProfileViewModel
     [Display(Name = "Agent full name")]
     public string FullName { get; set; } = string.Empty;
 
+    [Required, MaxLength(50)]
+    [Display(Name = "National ID number")]
+    public string IdNumber { get; set; } = string.Empty;
+
     [Required, EmailAddress]
     [Display(Name = "Agent email")]
     public string Email { get; set; } = string.Empty;
@@ -289,6 +349,10 @@ public class AgentProfileViewModel
 
 public class AgentEmailLookupViewModel
 {
+    [Required, MaxLength(50)]
+    [Display(Name = "National ID number registered by your vehicle owner")]
+    public string IdNumber { get; set; } = string.Empty;
+
     [Required, EmailAddress]
     [Display(Name = "Email address registered by your vehicle owner")]
     public string Email { get; set; } = string.Empty;
@@ -296,6 +360,10 @@ public class AgentEmailLookupViewModel
 
 public class AgentClaimViewModel
 {
+    [Required, MaxLength(50)]
+    [Display(Name = "National ID number")]
+    public string IdNumber { get; set; } = string.Empty;
+
     [Required, EmailAddress]
     [Display(Name = "Registered email address")]
     public string Email { get; set; } = string.Empty;

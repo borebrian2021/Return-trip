@@ -11,6 +11,7 @@ public class CompanyAgent
     public CompanyRegistration? Company { get; set; }
 
     public string FullName { get; set; } = string.Empty;
+    public string? IdNumber { get; set; }
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;

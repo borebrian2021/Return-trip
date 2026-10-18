@@ -8,7 +8,7 @@
     <div>
         <h1><i class="fa fa-user-tie me-2" style="color:#0e7490;font-size:20px;"></i>Add Agent</h1>
         <p class="dash-page-header__sub">
-            Register an agent's details. They claim this profile using their email address.
+            Register an agent's ID number, email, and contact details. They use their ID number and email to activate this profile.
         </p>
     </div>
     <div class="dash-page-header__actions">
@@ -45,6 +45,13 @@
                                 <input asp-for="FullName" class="form-control" autocomplete="name"
                                        placeholder="e.g. Grace Wanjiku" />
                                 <span asp-validation-for="FullName" class="post-field-error"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="post-field">
+                                <label asp-for="IdNumber"></label>
+                                <input asp-for="IdNumber" class="form-control" autocomplete="off" />
+                                <span asp-validation-for="IdNumber" class="post-field-error"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -91,7 +98,7 @@
                 </div>
                 <div class="auth-info-banner mt-3" style="margin:0;">
                     <strong><i class="fa fa-envelope me-1"></i>Claiming the profile</strong>
-                    The agent goes to the Register page, enters their email, and sets a password
+                    The agent goes to the Register page, enters their ID number and registered email, then sets a password
                     to activate their account. Until they claim it, the profile is visible here
                     as "Unclaimed".
                 </div>

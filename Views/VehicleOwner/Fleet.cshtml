@@ -1,0 +1,60 @@
+@model OwnerFleetRoutesViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Fleet Routes";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-route me-2" style="color:#0e7490;font-size:20px;"></i>Fleet Routes</h1>
+        <p class="dash-page-header__sub">Current route and schedule for each vehicle in your fleet.</p>
+    </div>
+</div>
+
+<div class="dash-panel">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title">Vehicle Route Overview</h2>
+    </div>
+    @if (!Model.Vehicles.Any())
+    {
+        <div class="dash-empty">
+            <i class="fa fa-truck"></i>
+            <p>No vehicles registered yet.</p>
+            <a asp-action="AddVehicle" class="dash-btn dash-btn--primary"><i class="fa fa-plus"></i> Add Vehicle</a>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Number Plate</th>
+                        <th>Vehicle</th>
+                        <th>Company</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Departure</th>
+                        <th>Return</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var vehicle in Model.Vehicles)
+                    {
+                        <tr>
+                            <td class="td-primary">@vehicle.NumberPlate</td>
+                            <td class="td-muted">@vehicle.VehicleType</td>
+                            <td class="td-muted">@vehicle.CompanyName</td>
+                            <td class="td-muted">@(vehicle.FromLocation ?? "Awaiting agent update")</td>
+                            <td class="td-muted">@(vehicle.ToLocation ?? "—")</td>
+                            <td class="td-muted">@(vehicle.DepartureDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="td-muted">@(vehicle.ReturnDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="td-muted">@(vehicle.UpdatedAt?.ToString("dd MMM yyyy") ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -57,6 +57,15 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
             .HasForeignKey(a => a.UserAccountId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<CompanyAgent>()
+            .Property(a => a.IdNumber)
+            .HasMaxLength(50);
+
+        modelBuilder.Entity<CompanyAgent>()
+            .HasIndex(a => a.IdNumber)
+            .IsUnique()
+            .HasFilter("[IdNumber] IS NOT NULL");
+
         modelBuilder.Entity<VehicleDetail>()
             .HasOne(v => v.VehicleOwner)
             .WithMany(v => v.Vehicles)

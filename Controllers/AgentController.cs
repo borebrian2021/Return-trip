@@ -49,7 +49,13 @@ public class AgentController : Controller
                     NumberPlate = vehicle.RegistrationNumber,
                     CompanyName = vehicle.Company.CompanyName,
                     FromLocation = currentRoute?.FromLocation,
+                    FromPlaceId = currentRoute?.FromPlaceId,
+                    FromLatitude = currentRoute?.FromLatitude,
+                    FromLongitude = currentRoute?.FromLongitude,
                     ToLocation = currentRoute?.ToLocation,
+                    ToPlaceId = currentRoute?.ToPlaceId,
+                    ToLatitude = currentRoute?.ToLatitude,
+                    ToLongitude = currentRoute?.ToLongitude,
                     DepartureDate = currentRoute?.TripStartsAt,
                     ReturnDate = currentRoute?.ReturnAvailabilityEndsAt,
                 };
@@ -69,6 +75,13 @@ public class AgentController : Controller
         if (!ModelState.IsValid || model.DepartureDate == null || model.ReturnDate == null || model.ReturnDate < model.DepartureDate)
         {
             TempData["Error"] = "Enter both locations and valid dates. The return date cannot be before departure.";
+            return RedirectToAction(nameof(Routes));
+        }
+
+        if (string.IsNullOrWhiteSpace(model.FromPlaceId) || model.FromLatitude == null || model.FromLongitude == null ||
+            string.IsNullOrWhiteSpace(model.ToPlaceId) || model.ToLatitude == null || model.ToLongitude == null)
+        {
+            TempData["Error"] = "Select both locations from the map suggestions so cargo route matching can use their coordinates.";
             return RedirectToAction(nameof(Routes));
         }
 
@@ -101,7 +114,13 @@ public class AgentController : Controller
         var returnDate = model.ReturnDate.Value.Date;
         route.CompanyAgentId = agent.Id;
         route.FromLocation = model.FromLocation.Trim();
+        route.FromPlaceId = model.FromPlaceId;
+        route.FromLatitude = model.FromLatitude;
+        route.FromLongitude = model.FromLongitude;
         route.ToLocation = model.ToLocation.Trim();
+        route.ToPlaceId = model.ToPlaceId;
+        route.ToLatitude = model.ToLatitude;
+        route.ToLongitude = model.ToLongitude;
         route.TripStartsAt = departureDate;
         route.ExpectedArrivalAt = returnDate;
         route.ReturnAvailabilityStartsAt = returnDate;

@@ -125,6 +125,53 @@
 
 </div>
 
+<div class="dash-panel mb-4">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title"><i class="fa fa-route me-2" style="color:#0e7490;"></i>Current Vehicle Routes</h2>
+        <a asp-action="Fleet" class="dash-panel__action">View fleet routes</a>
+    </div>
+    @if (!Model.CurrentRoutes.Any())
+    {
+        <div class="dash-empty">
+            <i class="fa fa-route"></i>
+            <p>No vehicles have been registered yet.</p>
+            <a asp-action="AddVehicle" class="dash-btn dash-btn--primary"><i class="fa fa-plus"></i> Add Vehicle</a>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="dash-table">
+                <thead>
+                    <tr><th>Vehicle</th><th>Company</th><th>Current route</th><th>Departure</th><th>Return</th><th>Updated</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var route in Model.CurrentRoutes)
+                    {
+                        <tr>
+                            <td class="td-primary">@route.NumberPlate <span class="td-muted">· @route.VehicleType</span></td>
+                            <td class="td-muted">@route.CompanyName</td>
+                            <td class="td-muted">
+                                @if (!string.IsNullOrWhiteSpace(route.FromLocation) && !string.IsNullOrWhiteSpace(route.ToLocation))
+                                {
+                                    @route.FromLocation <span>→</span> @route.ToLocation
+                                }
+                                else
+                                {
+                                    <span>Awaiting agent update</span>
+                                }
+                            </td>
+                            <td class="td-muted">@(route.DepartureDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="td-muted">@(route.ReturnDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="td-muted">@(route.UpdatedAt?.ToString("dd MMM yyyy") ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
 <!-- ── Bottom panels ─────────────────────────────────────────────────────────── -->
 <div class="row g-4 mt-1">
 

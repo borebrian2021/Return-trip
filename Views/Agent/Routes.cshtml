@@ -40,15 +40,29 @@ else
             <form asp-action="UpdateRoute" method="post" class="row g-3">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="VehicleId" value="@vehicle.VehicleId" />
+                <input type="hidden" id="from-place-@vehicle.VehicleId" name="FromPlaceId" value="@vehicle.FromPlaceId" />
+                <input type="hidden" id="from-lat-@vehicle.VehicleId" name="FromLatitude" value="@vehicle.FromLatitude" />
+                <input type="hidden" id="from-lng-@vehicle.VehicleId" name="FromLongitude" value="@vehicle.FromLongitude" />
+                <input type="hidden" id="to-place-@vehicle.VehicleId" name="ToPlaceId" value="@vehicle.ToPlaceId" />
+                <input type="hidden" id="to-lat-@vehicle.VehicleId" name="ToLatitude" value="@vehicle.ToLatitude" />
+                <input type="hidden" id="to-lng-@vehicle.VehicleId" name="ToLongitude" value="@vehicle.ToLongitude" />
 
                 <div class="col-md-6">
                     <label for="from-@vehicle.VehicleId" class="form-label">From location</label>
-                    <input id="from-@vehicle.VehicleId" name="FromLocation" value="@vehicle.FromLocation" class="form-control" maxlength="300" required />
+                    <div class="route-location-field">
+                        <input id="from-@vehicle.VehicleId" name="FromLocation" value="@vehicle.FromLocation" class="form-control route-location-input" maxlength="300" autocomplete="off" required />
+                        <ul id="from-options-@vehicle.VehicleId" class="route-place-options" role="listbox" hidden></ul>
+                    </div>
+                    <small class="form-text text-muted">Search and select a map result to save route coordinates.</small>
                 </div>
 
                 <div class="col-md-6">
                     <label for="to-@vehicle.VehicleId" class="form-label">To location</label>
-                    <input id="to-@vehicle.VehicleId" name="ToLocation" value="@vehicle.ToLocation" class="form-control" maxlength="300" required />
+                    <div class="route-location-field">
+                        <input id="to-@vehicle.VehicleId" name="ToLocation" value="@vehicle.ToLocation" class="form-control route-location-input" maxlength="300" autocomplete="off" required />
+                        <ul id="to-options-@vehicle.VehicleId" class="route-place-options" role="listbox" hidden></ul>
+                    </div>
+                    <small class="form-text text-muted">Search and select a map result to save route coordinates.</small>
                 </div>
 
                 <div class="col-md-6">
@@ -67,4 +81,98 @@ else
             </form>
         </div>
     }
+}
+
+@section Styles {
+    <style>
+        .route-location-field { position: relative; }
+        .route-place-options {
+            position: absolute;
+            z-index: 20;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            max-height: 240px;
+            overflow-y: auto;
+            margin: 0;
+            padding: 4px;
+            list-style: none;
+            background: #fff;
+            border: 1px solid #dce3df;
+            border-radius: 6px;
+            box-shadow: 0 8px 20px rgba(20, 38, 31, .14);
+        }
+        .route-place-options button {
+            width: 100%;
+            padding: 9px 10px;
+            border: 0;
+            border-radius: 4px;
+            background: transparent;
+            color: #303936;
+            text-align: left;
+            font-size: 13px;
+        }
+        .route-place-options button:hover,
+        .route-place-options button:focus { background: #f1f5f3; outline: none; }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.route-location-input').forEach(function (input) {
+            const id = input.id;
+            const side = id.startsWith('from-') ? 'from' : 'to';
+            const vehicleId = id.substring(side.length + 1);
+            const placeId = document.getElementById(side + '-place-' + vehicleId);
+            const latitude = document.getElementById(side + '-lat-' + vehicleId);
+            const longitude = document.getElementById(side + '-lng-' + vehicleId);
+            const options = document.getElementById(side + '-options-' + vehicleId);
+            let searchTimer;
+
+            input.addEventListener('input', function () {
+                placeId.value = '';
+                latitude.value = '';
+                longitude.value = '';
+                options.replaceChildren();
+                options.hidden = true;
+                const query = input.value.trim();
+                window.clearTimeout(searchTimer);
+                if (query.length < 3) return;
+
+                searchTimer = window.setTimeout(async function () {
+                    try {
+                        const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(query);
+                        const response = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+                        if (!response.ok) throw new Error('Location search failed');
+                        const places = await response.json();
+                        options.replaceChildren();
+                        places.forEach(function (place) {
+                            const item = document.createElement('li');
+                            const button = document.createElement('button');
+                            button.type = 'button';
+                            button.textContent = place.display_name;
+                            button.addEventListener('mousedown', function (event) {
+                                event.preventDefault();
+                                input.value = place.display_name.split(',').slice(0, 3).join(',').trim();
+                                placeId.value = (place.osm_type || 'place') + '/' + place.osm_id;
+                                latitude.value = place.lat;
+                                longitude.value = place.lon;
+                                options.replaceChildren();
+                                options.hidden = true;
+                            });
+                            item.appendChild(button);
+                            options.appendChild(item);
+                        });
+                        options.hidden = places.length === 0;
+                    } catch {
+                        options.hidden = true;
+                    }
+                }, 400);
+            });
+
+            input.addEventListener('blur', function () {
+                window.setTimeout(function () { options.hidden = true; }, 160);
+            });
+        });
+    </script>
 }

@@ -10,6 +10,8 @@ namespace Return_trip.Controllers;
 [Authorize(Roles = AppRoles.GoodsOwner)]
 public class GoodsOwnerController : Controller
 {
+    private const double RouteEndpointMatchRadiusKm = 30;
+
     private readonly SystemDBContext _db;
     private readonly UserManager<UserAccount> _userManager;
     private readonly IConfiguration _config;
@@ -140,6 +142,93 @@ public class GoodsOwnerController : Controller
     // ── Post Cargo ────────────────────────────────────────────────────────────
 
     [HttpGet]
+    public async Task<IActionResult> AvailableVehicles(
+        decimal fromLatitude,
+        decimal fromLongitude,
+        decimal toLatitude,
+        decimal toLongitude,
+        DateTime? pickupDateTime)
+    {
+        if (fromLatitude is < -90 or > 90 || toLatitude is < -90 or > 90 ||
+            fromLongitude is < -180 or > 180 || toLongitude is < -180 or > 180)
+        {
+            return BadRequest();
+        }
+
+        var routes = await _db.VehicleRoutes
+            .Where(route => route.IsAwaitingReturn &&
+                            route.FromLatitude.HasValue && route.FromLongitude.HasValue &&
+                            route.ToLatitude.HasValue && route.ToLongitude.HasValue)
+            .Include(route => route.VehicleDetail)
+                .ThenInclude(vehicle => vehicle.Company)
+            .ToListAsync();
+
+        var requestedPickupDate = pickupDateTime?.Date;
+        var matches = new List<(AvailableVehicleSuggestionViewModel Suggestion, double Score)>();
+
+        foreach (var route in routes
+                     .GroupBy(route => route.VehicleDetailId)
+                     .Select(group => group.OrderByDescending(route => route.UpdatedAt ?? route.CreatedAt).First()))
+        {
+            var outboundStartDistance = HaversineKm(fromLatitude, fromLongitude, route.FromLatitude!.Value, route.FromLongitude!.Value);
+            var outboundEndDistance = HaversineKm(toLatitude, toLongitude, route.ToLatitude!.Value, route.ToLongitude!.Value);
+            var isOutboundMatch = outboundStartDistance <= RouteEndpointMatchRadiusKm &&
+                                 outboundEndDistance <= RouteEndpointMatchRadiusKm;
+
+            var returnStartDistance = HaversineKm(fromLatitude, fromLongitude, route.ToLatitude.Value, route.ToLongitude.Value);
+            var returnEndDistance = HaversineKm(toLatitude, toLongitude, route.FromLatitude.Value, route.FromLongitude.Value);
+            var isReturnMatch = returnStartDistance <= RouteEndpointMatchRadiusKm &&
+                                returnEndDistance <= RouteEndpointMatchRadiusKm;
+
+            var direction = "Outbound";
+            var pickupDistance = outboundStartDistance;
+            var deliveryDistance = outboundEndDistance;
+            var availableFrom = route.TripStartsAt.Date;
+            var availableUntil = route.ExpectedArrivalAt.Date;
+
+            if (!isOutboundMatch && isReturnMatch)
+            {
+                direction = "Return";
+                pickupDistance = returnStartDistance;
+                deliveryDistance = returnEndDistance;
+                availableFrom = route.ReturnAvailabilityStartsAt?.Date ?? route.ExpectedArrivalAt.Date;
+                availableUntil = route.ReturnAvailabilityEndsAt?.Date ?? route.ExpectedArrivalAt.Date;
+            }
+            else if (!isOutboundMatch)
+            {
+                continue;
+            }
+
+            if (requestedPickupDate.HasValue &&
+                (requestedPickupDate.Value < availableFrom || requestedPickupDate.Value > availableUntil))
+            {
+                continue;
+            }
+
+            var suggestion = new AvailableVehicleSuggestionViewModel
+            {
+                NumberPlate = route.VehicleDetail.RegistrationNumber,
+                VehicleType = route.VehicleDetail.VehicleType,
+                CompanyName = route.VehicleDetail.Company.CompanyName,
+                FromLocation = route.FromLocation,
+                ToLocation = route.ToLocation,
+                Direction = direction,
+                PickupDistanceKm = (decimal)Math.Round(pickupDistance, 1),
+                DeliveryDistanceKm = (decimal)Math.Round(deliveryDistance, 1),
+                DepartureDate = direction == "Return" ? availableFrom : route.TripStartsAt,
+                ReturnDate = direction == "Return" ? availableUntil : route.ExpectedArrivalAt,
+            };
+
+            matches.Add((suggestion, pickupDistance + deliveryDistance));
+        }
+
+        return Json(matches
+            .OrderBy(match => match.Score)
+            .Take(8)
+            .Select(match => match.Suggestion));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> PostCargo()
     {
         var (user, owner) = await GetContextAsync();
@@ -230,6 +319,18 @@ public class GoodsOwnerController : Controller
 
         TempData["Success"] = $"Cargo listing \"{cargo.Title}\" posted successfully. Drivers can now bid on it.";
         return RedirectToAction(nameof(MyListings));
+    }
+
+    private static double HaversineKm(decimal latitude1, decimal longitude1, decimal latitude2, decimal longitude2)
+    {
+        const double earthRadiusKm = 6371;
+        var lat1 = (double)latitude1 * Math.PI / 180;
+        var lat2 = (double)latitude2 * Math.PI / 180;
+        var deltaLat = ((double)latitude2 - (double)latitude1) * Math.PI / 180;
+        var deltaLon = ((double)longitude2 - (double)longitude1) * Math.PI / 180;
+        var a = Math.Pow(Math.Sin(deltaLat / 2), 2) +
+                Math.Cos(lat1) * Math.Cos(lat2) * Math.Pow(Math.Sin(deltaLon / 2), 2);
+        return earthRadiusKm * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
     }
 
     // ── My Listings ───────────────────────────────────────────────────────────

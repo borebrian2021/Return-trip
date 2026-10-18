@@ -342,6 +342,10 @@ namespace Return_trip.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("IdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -358,6 +362,10 @@ namespace Return_trip.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("IdNumber")
+                        .IsUnique()
+                        .HasFilter("[IdNumber] IS NOT NULL");
 
                     b.HasIndex("UserAccountId");
 

@@ -5,6 +5,73 @@
     var filter = ViewData["Filter"] as string;
 }
 
+@@section Styles {
+    <style>
+        .driver-filter-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            padding: 6px;
+            background: #fff;
+            border: 1px solid #e8eceb;
+            border-radius: 8px;
+        }
+
+        .driver-filter {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 9px 12px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            color: #59645f;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+        }
+
+        .driver-filter:hover {
+            background: #f5f7f6;
+            color: #1a3c5e;
+            text-decoration: none;
+        }
+
+        .driver-filter.active {
+            background: #eef3f7;
+            border-color: #d8e2e9;
+            color: #1a3c5e;
+        }
+
+        .driver-filter__count {
+            min-width: 27px;
+            height: 27px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+            border-radius: 5px;
+            background: #f0f2f1;
+            color: #46514c;
+            font-size: 12px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .driver-filter.active .driver-filter__count {
+            background: #1a3c5e;
+            color: #fff;
+        }
+
+        @@media (max-width: 640px) {
+            .driver-filter-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+    </style>
+}
+
 <div class="dash-page-header">
     <div>
         <h1><i class="fa fa-id-card me-2" style="color:#1a3c5e;font-size:20px;"></i>Drivers</h1>
@@ -24,25 +91,24 @@
     </div>
 }
 
-<!-- Filter strip -->
-<div class="listings-stat-strip mb-4">
-    <a asp-action="Drivers" class="listings-stat @(filter == null ? "active" : "")">
-        <span class="listings-stat__value">@Model.Count</span>
-        <span class="listings-stat__label">All</span>
+<nav class="driver-filter-strip mb-4" aria-label="Filter drivers">
+    <a asp-action="Drivers" aria-current="@(filter == null ? "page" : null)" class="driver-filter @(filter == null ? "active" : "")">
+        <span>All</span>
+        <span class="driver-filter__count">@Model.Count</span>
     </a>
-    <a asp-action="Drivers" asp-route-filter="verified" class="listings-stat @(filter == "verified" ? "active" : "")">
-        <span class="listings-stat__value">@Model.Count(d => d.IsVerified)</span>
-        <span class="listings-stat__label">Verified</span>
+    <a asp-action="Drivers" asp-route-filter="verified" aria-current="@(filter == "verified" ? "page" : null)" class="driver-filter @(filter == "verified" ? "active" : "")">
+        <span>Verified</span>
+        <span class="driver-filter__count">@Model.Count(d => d.IsVerified)</span>
     </a>
-    <a asp-action="Drivers" asp-route-filter="claimed" class="listings-stat @(filter == "claimed" ? "active" : "")">
-        <span class="listings-stat__value">@Model.Count(d => d.HasAccount)</span>
-        <span class="listings-stat__label">Claimed</span>
+    <a asp-action="Drivers" asp-route-filter="claimed" aria-current="@(filter == "claimed" ? "page" : null)" class="driver-filter @(filter == "claimed" ? "active" : "")">
+        <span>Claimed</span>
+        <span class="driver-filter__count">@Model.Count(d => d.HasAccount)</span>
     </a>
-    <a asp-action="Drivers" asp-route-filter="unclaimed" class="listings-stat @(filter == "unclaimed" ? "active" : "")">
-        <span class="listings-stat__value">@Model.Count(d => !d.HasAccount)</span>
-        <span class="listings-stat__label">Unclaimed</span>
+    <a asp-action="Drivers" asp-route-filter="unclaimed" aria-current="@(filter == "unclaimed" ? "page" : null)" class="driver-filter @(filter == "unclaimed" ? "active" : "")">
+        <span>Unclaimed</span>
+        <span class="driver-filter__count">@Model.Count(d => !d.HasAccount)</span>
     </a>
-</div>
+</nav>
 
 <div class="dash-panel">
     <div class="dash-panel__header">

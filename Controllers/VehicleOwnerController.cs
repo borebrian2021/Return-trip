@@ -63,6 +63,8 @@ public class VehicleOwnerController : Controller
 
         var vehicles = await _db.VehicleDetails
             .Where(v => v.VehicleOwnerId == owner.Id)
+            .Include(v => v.Company)
+            .Include(v => v.Routes)
             .ToListAsync();
 
         var companies = await _db.CompanyRegistrations
@@ -98,6 +100,11 @@ public class VehicleOwnerController : Controller
             EarningsThisMonth = bids
                 .Where(b => b.Status == "Completed" && b.CompletedAt >= startOfMonth)
                 .Sum(b => b.BidAmount),
+            CurrentRoutes = vehicles
+                .Select(BuildOwnerVehicleRouteRow)
+                .OrderByDescending(v => v.UpdatedAt ?? DateTime.MinValue)
+                .Take(6)
+                .ToList(),
         };
 
         vm.RecentDrivers = drivers.OrderByDescending(d => d.CreatedAt).Take(8)
@@ -307,6 +314,7 @@ public class VehicleOwnerController : Controller
         {
             Id          = a.Id,
             FullName    = a.FullName,
+            IdNumber    = a.IdNumber ?? string.Empty,
             Email       = a.Email,
             PhoneNumber = a.PhoneNumber,
             IsActive    = a.IsActive,
@@ -338,9 +346,16 @@ public class VehicleOwnerController : Controller
         if (!ModelState.IsValid) return View(model);
 
         var email = model.Email.Trim();
+        var idNumber = model.IdNumber.Trim();
         if (await _db.CompanyAgents.AnyAsync(a => a.Email == email))
         {
             ModelState.AddModelError(nameof(model.Email), "An agent with this email is already registered.");
+            return View(model);
+        }
+
+        if (await _db.CompanyAgents.AnyAsync(a => a.IdNumber == idNumber))
+        {
+            ModelState.AddModelError(nameof(model.IdNumber), "An agent profile with this ID number is already registered.");
             return View(model);
         }
 
@@ -355,13 +370,14 @@ public class VehicleOwnerController : Controller
         {
             VehicleOwnerId = owner.Id,
             FullName       = model.FullName.Trim(),
+            IdNumber       = idNumber,
             Email          = email,
             PhoneNumber    = model.PhoneNumber.Trim(),
             IsActive       = true,
         });
         await _db.SaveChangesAsync();
 
-        TempData["Success"] = $"Agent \"{model.FullName}\" added. They can now claim the profile using their email.";
+        TempData["Success"] = $"Agent \"{model.FullName}\" added. They can claim the profile using their ID number and registered email.";
         return RedirectToAction(nameof(Agents));
     }
 
@@ -728,7 +744,40 @@ public class VehicleOwnerController : Controller
         var (user, owner) = await GetContextAsync();
         SetLayoutData(user, owner, "fleet");
         ViewData["Title"] = "Fleet Routes";
-        return View("ComingSoon");
+
+        var vehicles = await _db.VehicleDetails
+            .Where(v => v.VehicleOwnerId == owner.Id)
+            .Include(v => v.Company)
+            .Include(v => v.Routes)
+            .OrderBy(v => v.RegistrationNumber)
+            .ToListAsync();
+
+        var model = new OwnerFleetRoutesViewModel
+        {
+            Vehicles = vehicles.Select(BuildOwnerVehicleRouteRow).ToList(),
+        };
+
+        return View(model);
+    }
+
+    private static OwnerVehicleRouteViewModel BuildOwnerVehicleRouteRow(VehicleDetail vehicle)
+    {
+        var route = vehicle.Routes
+            .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
+            .FirstOrDefault();
+
+        return new OwnerVehicleRouteViewModel
+        {
+            VehicleId = vehicle.Id,
+            NumberPlate = vehicle.RegistrationNumber,
+            VehicleType = vehicle.VehicleType,
+            CompanyName = vehicle.Company?.CompanyName ?? string.Empty,
+            FromLocation = route?.FromLocation,
+            ToLocation = route?.ToLocation,
+            DepartureDate = route?.TripStartsAt,
+            ReturnDate = route?.ReturnAvailabilityEndsAt,
+            UpdatedAt = route?.UpdatedAt ?? route?.CreatedAt,
+        };
     }
 
     public async Task<IActionResult> Earnings()

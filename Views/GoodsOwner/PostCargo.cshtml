@@ -157,6 +157,18 @@
                         </div>
                     </div>
 
+                    <div class="route-match-panel" id="route-match-panel" aria-live="polite">
+                        <div class="route-match-panel__heading">
+                            <div>
+                                <strong>Vehicles on this route</strong>
+                                <span>Matches are within 30 km of both selected endpoints.</span>
+                            </div>
+                            <i class="fa fa-truck-fast" aria-hidden="true"></i>
+                        </div>
+                        <p class="route-match-message" id="route-match-message">Select pickup and delivery locations from the map suggestions to see matches.</p>
+                        <ul class="route-match-results" id="route-match-results"></ul>
+                    </div>
+
                     <!-- Distance row -->
                     <div class="row g-3 mt-1" id="distance-row">
                         <div class="col-md-6">
@@ -506,6 +518,43 @@
 /* location input */
 .location-input-wrap { position: relative; }
 .location-input-wrap .form-control { padding-right: 36px; }
+.route-match-panel {
+    margin: 10px 0 18px;
+    padding: 15px 16px;
+    background: #f7f9f8;
+    border: 1px solid #e3eae6;
+    border-radius: 8px;
+}
+.route-match-panel__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #263a32;
+    font-size: 13px;
+}
+.route-match-panel__heading div { display: grid; gap: 3px; }
+.route-match-panel__heading span,
+.route-match-message { color: #78837e; font-size: 11px; margin: 0; }
+.route-match-panel__heading > i { color: #0e7490; font-size: 17px; }
+.route-match-results { display: grid; gap: 7px; margin: 10px 0 0; padding: 0; list-style: none; }
+.route-match-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid #e8eceb;
+    border-radius: 6px;
+    color: #303936;
+    font-size: 12px;
+}
+.route-match-result__main { min-width: 0; }
+.route-match-result__main strong { display: block; color: #1a3c5e; font-size: 13px; }
+.route-match-result__main span { display: block; margin-top: 3px; color: #78837e; }
+.route-match-result__distance { flex: 0 0 auto; color: #1a7a45; font-size: 11px; font-weight: 700; text-align: right; }
+.route-match-message { margin-top: 10px; }
 .location-input-icon {
     position: absolute;
     right: 12px;
@@ -632,6 +681,7 @@
             placeEl.value = '';
             latEl.value   = '';
             lngEl.value   = '';
+            if (typeof onSelected === 'function') onSelected();
 
             const q = this.value.trim();
             clearTimeout(debounceTimer);
@@ -710,6 +760,77 @@
         }
     }
 
+    const routeMatchMessage = document.getElementById('route-match-message');
+    const routeMatchResults = document.getElementById('route-match-results');
+    const routeMatchesUrl = '@Url.Action("AvailableVehicles", "GoodsOwner")';
+    let routeMatchRequest;
+
+    function refreshRouteMatches() {
+        const fromLatitude = document.getElementById('FromLatitude').value;
+        const fromLongitude = document.getElementById('FromLongitude').value;
+        const toLatitude = document.getElementById('ToLatitude').value;
+        const toLongitude = document.getElementById('ToLongitude').value;
+
+        routeMatchRequest?.abort();
+        routeMatchResults.replaceChildren();
+        if (!fromLatitude || !fromLongitude || !toLatitude || !toLongitude) {
+            routeMatchMessage.textContent = 'Select pickup and delivery locations from the map suggestions to see matches.';
+            return;
+        }
+
+        routeMatchMessage.textContent = 'Checking current vehicle routes…';
+        const params = new URLSearchParams({ fromLatitude, fromLongitude, toLatitude, toLongitude });
+        const pickupDate = document.getElementById('PickupDateTime')?.value;
+        if (pickupDate) params.set('pickupDateTime', pickupDate);
+        routeMatchRequest = new AbortController();
+
+        fetch(routeMatchesUrl + '?' + params.toString(), { signal: routeMatchRequest.signal })
+            .then(function (response) {
+                if (!response.ok) throw new Error('Could not load route matches.');
+                return response.json();
+            })
+            .then(function (vehicles) {
+                routeMatchResults.replaceChildren();
+                if (!vehicles.length) {
+                    routeMatchMessage.textContent = 'No current vehicle routes match both locations and the selected pickup date.';
+                    return;
+                }
+
+                routeMatchMessage.textContent = vehicles.length + ' vehicle' + (vehicles.length === 1 ? '' : 's') + ' match this route.';
+                vehicles.forEach(function (vehicle) {
+                    const item = document.createElement('li');
+                    item.className = 'route-match-result';
+                    const main = document.createElement('div');
+                    main.className = 'route-match-result__main';
+                    const title = document.createElement('strong');
+                    title.textContent = vehicle.numberPlate + ' · ' + vehicle.vehicleType;
+                    const route = document.createElement('span');
+                    route.textContent = vehicle.direction + ' · ' + vehicle.companyName + ' · ' + vehicle.fromLocation + ' to ' + vehicle.toLocation;
+                    const dates = document.createElement('span');
+                    dates.textContent = 'Departure ' + new Date(vehicle.departureDate).toLocaleDateString() + ' · Return ' + new Date(vehicle.returnDate).toLocaleDateString();
+                    main.append(title, route, dates);
+                    const distance = document.createElement('div');
+                    distance.className = 'route-match-result__distance';
+                    distance.textContent = vehicle.pickupDistanceKm + ' km pickup · ' + vehicle.deliveryDistanceKm + ' km delivery';
+                    item.append(main, distance);
+                    routeMatchResults.appendChild(item);
+                });
+            })
+            .catch(function (error) {
+                if (error.name !== 'AbortError') {
+                    routeMatchMessage.textContent = 'Vehicle route matches are temporarily unavailable.';
+                }
+            });
+    }
+
+    function onLocationSelected() {
+        tryAutoDistance();
+        refreshRouteMatches();
+    }
+
+    document.getElementById('PickupDateTime')?.addEventListener('change', refreshRouteMatches);
+    document.getElementById('PickupDateTime')?.addEventListener('input', refreshRouteMatches);
+
     document.getElementById('override-distance')?.addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('DistanceKm').value = '';
@@ -720,8 +841,8 @@
     });
 
     // init both location fields
-    makeAutocomplete('FromLocation', 'FromPlaceId', 'FromLatitude', 'FromLongitude', tryAutoDistance);
-    makeAutocomplete('ToLocation',   'ToPlaceId',   'ToLatitude',   'ToLongitude',   tryAutoDistance);
+    makeAutocomplete('FromLocation', 'FromPlaceId', 'FromLatitude', 'FromLongitude', onLocationSelected);
+    makeAutocomplete('ToLocation',   'ToPlaceId',   'ToLatitude',   'ToLongitude',   onLocationSelected);
 })();
 </script>
 

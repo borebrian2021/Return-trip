@@ -1,1 +1,83 @@
-Q1
+@model List<VehicleDetail>
+@{
+Layout = "_DashboardLayout";
+ViewData["Title"] = "Vehicles";
+}
+
+<div class="dash-page-header">
+<div>
+    <h1><i class="fa fa-truck me-2" style="color:#d4890a;font-size:20px;"></i>Vehicles</h1>
+    <p class="dash-page-header__sub">All vehicles registered under your fleet.</p>
+</div>
+</div>
+
+<div class="dash-panel">
+<div class="dash-panel__header">
+    <h2 class="dash-panel__title">Fleet Vehicles</h2>
+    <a asp-action="AddVehicle" class="btn btn-primary">Add Vehicle</a>
+</div>
+@if (!Model.Any())
+{
+    <div class="dash-empty">
+        <i class="fa fa-truck"></i>
+        <p>No vehicles registered yet. Register a company first, then add vehicles to it.</p>
+        <a asp-action="AddCompany" class="btn btn-primary mt-3">Register Company</a>
+    </div>
+}
+else
+{
+    <div style="overflow-x:auto;">
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Number Plate</th>
+                    <th>Company</th>
+                    <th>Insurance</th>
+                    <th>Insurance Expiry</th>
+                    <th>Inspection</th>
+                    <th>Inspection Expiry</th>
+                    <th>Capacity (tonnes)</th>
+                    <th>Last Cargo</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in Model)
+                {
+                    <tr>
+                        <td class="td-primary">@v.VehicleType</td>
+                        <td class="td-muted">@v.RegistrationNumber</td>
+                        <td class="td-muted">@v.Company?.CompanyName</td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(v.InsuranceDocumentUrl))
+                            {
+                                <a asp-action="DownloadVehicleDocument" asp-route-id="@v.Id" asp-route-document="insurance">Download</a>
+                            }
+                            else { <span class="td-muted">Not uploaded</span> }
+                        </td>
+                        <td class="td-muted">@(v.InsuranceExpiryDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(v.InspectionReportUrl))
+                            {
+                                <a asp-action="DownloadVehicleDocument" asp-route-id="@v.Id" asp-route-document="inspection">Download</a>
+                            }
+                            else { <span class="td-muted">Not uploaded</span> }
+                        </td>
+                        <td class="td-muted">@(v.InspectionExpiryDate?.ToString("dd MMM yyyy") ?? "—")</td>
+                        <td class="td-muted">@v.Capacity</td>
+                        <td class="td-muted">@v.LastCargoTransported</td>
+                        <td>
+                            <span class="status-pill status-pill--@(v.IsApproved ? "accepted" : "pending")">
+                                @(v.IsApproved ? "Approved" : "Pending")
+                            </span>
+                        </td>
+                        <td class="td-muted">@v.CreatedAt.ToString("dd MMM yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+</div>

@@ -1,0 +1,127 @@
+@model AgentMarketplaceViewModel
+@{
+    Layout = "_DashboardLayout";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-box-open me-2" style="color:#d4890a;font-size:20px;"></i>Open Cargo</h1>
+        <p class="dash-page-header__sub">Review open loads and submit a bid using an eligible vehicle from your fleet.</p>
+    </div>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (!Model.Listings.Any())
+{
+    <div class="dash-panel">
+        <div class="dash-empty">
+            <i class="fa fa-box-open"></i>
+            <p>There are no open cargo listings available right now.</p>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var cargo in Model.Listings)
+    {
+        <div class="dash-panel mb-4">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title">@cargo.Title</h2>
+                <span class="status-pill status-pill--open">Open</span>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <p class="mb-2"><strong>Route:</strong> @cargo.FromLocation → @cargo.ToLocation</p>
+                    <p class="mb-2"><strong>Cargo:</strong> @cargo.PackageType · @cargo.WeightKg.ToString("N0") kg</p>
+                    <p class="mb-2"><strong>Goods owner guide price:</strong> KSh @cargo.TransportCost.ToString("N2")</p>
+                    @if (cargo.PricePerKg.HasValue)
+                    {
+                        <p class="mb-2"><strong>Guide price per kg:</strong> KSh @cargo.PricePerKg.Value.ToString("N2")</p>
+                    }
+                    <p class="mb-2"><strong>Pickup:</strong> @(cargo.PickupDateTime?.ToString("dd MMM yyyy HH:mm") ?? "Flexible")</p>
+                    <p class="mb-2"><strong>Latest pickup:</strong> @(cargo.PickupDeadlineAt?.ToString("dd MMM yyyy HH:mm") ?? "Not specified")</p>
+                    <p class="mb-2"><strong>Deliver by:</strong> @(cargo.DeliveryDeadlineAt?.ToString("dd MMM yyyy HH:mm") ?? "Not specified")</p>
+                    @if (!string.IsNullOrWhiteSpace(cargo.Description))
+                    {
+                        <p class="td-muted mt-3">@cargo.Description</p>
+                    }
+                    <p class="td-muted mb-0">@cargo.BidCount bid@(cargo.BidCount == 1 ? "" : "s") received</p>
+                </div>
+
+                <div class="col-lg-7">
+                    @if (cargo.EligibleVehicles.Any())
+                    {
+                        @if (cargo.ExistingBidId.HasValue)
+                        {
+                            <div class="alert alert-info">
+                                Your bid status: <strong>@cargo.ExistingBidStatus</strong>.
+                                @(cargo.ExistingPriceSuggestionStatus == "Pending" ? "Your price suggestion is awaiting the goods owner's decision." : "You can update your bid while this listing remains open.")
+                            </div>
+                        }
+                        <form asp-action="PlaceBid" method="post" class="row g-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="CargoId" value="@cargo.CargoId" />
+                            <div class="col-12">
+                                <label class="form-label" for="vehicle-@cargo.CargoId">Eligible vehicle and route</label>
+                                <select class="form-select" id="vehicle-@cargo.CargoId" name="VehicleRouteId" required>
+                                    @foreach (var vehicle in cargo.EligibleVehicles)
+                                    {
+                                        <option value="@vehicle.VehicleRouteId" selected="@(vehicle.VehicleRouteId == cargo.BidForm.VehicleRouteId)">
+                                            @vehicle.RegistrationNumber · @vehicle.VehicleType · @vehicle.Direction · @vehicle.Route
+                                        </option>
+                                    }
+                                </select>
+                                <small class="form-text text-muted">Vehicles are filtered by route availability, pickup dates, and registered capacity.</small>
+                            </div>
+                            @if (cargo.EligibleVehicles.Any(vehicle => vehicle.RequiresManualRouteCheck))
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-warning mb-0">
+                                        This cargo has no map coordinates. Confirm the selected vehicle's route manually before bidding.
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-md-6">
+                                <label class="form-label" for="bid-@cargo.CargoId">Your bid (KSh)</label>
+                                <input class="form-control" id="bid-@cargo.CargoId" name="BidAmount" type="number"
+                                       min="0.01" step="0.01" value="@cargo.BidForm.BidAmount" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="suggestion-@cargo.CargoId">Suggested price (optional)</label>
+                                <input class="form-control" id="suggestion-@cargo.CargoId" name="SuggestedAmount" type="number"
+                                       min="0.01" step="0.01" value="@cargo.BidForm.SuggestedAmount" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="reason-@cargo.CargoId">Reason for suggested price</label>
+                                <textarea class="form-control" id="reason-@cargo.CargoId" name="SuggestionComments"
+                                          rows="2" maxlength="500">@cargo.BidForm.SuggestionComments</textarea>
+                                <small class="form-text text-muted">Required when you enter a suggested price. The goods owner can accept or reject it before awarding a bid.</small>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-gavel me-2"></i>@(cargo.ExistingBidId.HasValue ? "Update Bid" : "Submit Bid")
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="dash-empty">
+                            <i class="fa fa-route"></i>
+                            <p>No approved vehicle currently matches this cargo's route, pickup date, and capacity.</p>
+                            <a asp-action="Routes" class="dash-btn dash-btn--outline">Update vehicle routes</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}

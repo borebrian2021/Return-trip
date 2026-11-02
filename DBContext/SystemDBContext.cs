@@ -17,6 +17,9 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
     public DbSet<GoodsOwner> GoodsOwners { get; set; }
     public DbSet<Cargo> Cargoes { get; set; }
     public DbSet<CargoBid> CargoBids { get; set; }
+    public DbSet<CargoPayment> CargoPayments { get; set; }
+    public DbSet<FuelAdvance> FuelAdvances { get; set; }
+    public DbSet<TripActivity> TripActivities { get; set; }
     public DbSet<VehicleRoute> VehicleRoutes { get; set; }
     public DbSet<DeliveryReceipt> DeliveryReceipts { get; set; }
     public DbSet<BankDetail> BankDetails { get; set; }
@@ -77,6 +80,10 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
             .WithMany(c => c.Vehicles)
             .HasForeignKey(v => v.CompanyId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<VehicleDetail>()
+            .Property(v => v.Capacity)
+            .HasPrecision(18, 2);
 
         modelBuilder.Entity<Driver>()
             .HasOne(d => d.VehicleOwner)
@@ -148,6 +155,72 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
 
         modelBuilder.Entity<CargoBid>()
             .HasIndex(b => new { b.Status, b.CreatedAt });
+
+        modelBuilder.Entity<CargoBid>()
+            .Property(b => b.TripStatus)
+            .HasMaxLength(40)
+            .HasDefaultValue("AwaitingDeposit");
+
+        modelBuilder.Entity<CargoBid>()
+            .HasIndex(b => new { b.DriverId, b.TripStatus });
+
+        modelBuilder.Entity<CargoPayment>()
+            .HasOne(p => p.CargoBid)
+            .WithMany(b => b.Payments)
+            .HasForeignKey(p => p.CargoBidId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CargoPayment>()
+            .HasIndex(p => p.Reference)
+            .IsUnique();
+
+        modelBuilder.Entity<CargoPayment>()
+            .Property(p => p.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<CargoPayment>()
+            .Property(p => p.Reference)
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<CargoPayment>()
+            .Property(p => p.Status)
+            .HasMaxLength(30);
+
+        modelBuilder.Entity<FuelAdvance>()
+            .HasOne(f => f.CargoBid)
+            .WithMany(b => b.FuelAdvances)
+            .HasForeignKey(f => f.CargoBidId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<FuelAdvance>()
+            .HasIndex(f => f.Reference)
+            .IsUnique();
+
+        modelBuilder.Entity<FuelAdvance>()
+            .Property(f => f.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<FuelAdvance>()
+            .Property(f => f.Reference)
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<FuelAdvance>()
+            .Property(f => f.Status)
+            .HasMaxLength(30);
+
+        modelBuilder.Entity<TripActivity>()
+            .HasOne(a => a.CargoBid)
+            .WithMany(b => b.Activities)
+            .HasForeignKey(a => a.CargoBidId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<TripActivity>()
+            .Property(a => a.Activity)
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<TripActivity>()
+            .Property(a => a.Details)
+            .HasMaxLength(1000);
 
         modelBuilder.Entity<VehicleRoute>()
             .HasOne(r => r.VehicleDetail)
@@ -297,6 +370,10 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<Cargo>()
+            .Property(c => c.DistanceKm)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Cargo>()
             .Property(c => c.PricePerKg)
             .HasPrecision(18, 2);
 
@@ -314,6 +391,23 @@ public class SystemDBContext : IdentityDbContext<UserAccount, IdentityRole<int>,
 
         modelBuilder.Entity<CargoBid>()
             .Property(b => b.SuggestedAmount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<CargoBid>()
+            .Property(b => b.DepositAmount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<CargoBid>()
+            .Property(b => b.PaymentStatus)
+            .HasMaxLength(30)
+            .HasDefaultValue("NotStarted");
+
+        modelBuilder.Entity<CargoBid>()
+            .Property(b => b.PaymentReference)
+            .HasMaxLength(100);
+
+        modelBuilder.Entity<AdminCommissionSetting>()
+            .Property(s => s.Percentage)
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<Cargo>()

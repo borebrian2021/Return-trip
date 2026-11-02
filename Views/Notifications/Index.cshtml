@@ -1,0 +1,44 @@
+@model IReadOnlyList<Notification>
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-bell me-2" style="color:#d4890a;font-size:20px;"></i>Notifications</h1>
+        <p class="dash-page-header__sub">Trip, payment, and account updates.</p>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="dash-panel"><p class="mb-0">No notifications yet.</p></div>
+}
+else
+{
+    @foreach (var notification in Model)
+    {
+        <article class="dash-panel mb-3">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <h2 class="dash-panel__title">@notification.Title</h2>
+                    <p class="mb-1">@notification.Message</p>
+                    <span class="td-muted">@notification.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</span>
+                </div>
+                @if (!notification.IsRead)
+                {
+                    <form asp-action="MarkRead" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@notification.Id" />
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Mark read</button>
+                    </form>
+                }
+                else
+                {
+                    <span class="td-muted">Read</span>
+                }
+            </div>
+        </article>
+    }
+}

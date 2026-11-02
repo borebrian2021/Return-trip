@@ -1,6 +1,22 @@
 (function() {
 	'use strict';
 
+	var scrollTopButton = document.getElementById('siteScrollTop');
+	if (scrollTopButton) {
+		var updateScrollTopButton = function() {
+			scrollTopButton.classList.toggle('is-visible', window.pageYOffset > 280);
+		};
+
+		window.addEventListener('scroll', updateScrollTopButton, { passive: true });
+		scrollTopButton.addEventListener('click', function() {
+			window.scrollTo({
+				top: 0,
+				behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+			});
+		});
+		updateScrollTopButton();
+	}
+
 	var tinyslider = function() {
 		var el = document.querySelectorAll('.testimonial-slider');
 

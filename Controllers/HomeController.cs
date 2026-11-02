@@ -29,9 +29,34 @@ public class HomeController : Controller
         _roleManager = roleManager;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View("Landing");
+        var listings = await _db.Cargoes
+            .AsNoTracking()
+            .Where(c => c.Status == "Open" && c.IsBidOpen)
+            .OrderByDescending(c => c.CreatedAt)
+            .Take(8)
+            .Select(c => new CargoListingRow
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Route = $"{c.FromLocation} → {c.ToLocation}",
+                PackageType = c.PackageType,
+                WeightKg = c.WeightKg,
+                PricingMode = c.PricingMode,
+                TransportCost = c.TransportCost,
+                PricePerKg = c.PricePerKg,
+                Status = c.Status,
+                IsBidOpen = c.IsBidOpen,
+                BidCount = c.Bids.Count,
+                AcceptedBidCount = c.Bids.Count(b => b.Status == "Accepted"),
+                RequiredDepartureAt = c.PickupDateTime ?? c.RequiredDepartureAt,
+                DeliveryDeadlineAt = c.DeliveryDeadlineAt,
+                CreatedAt = c.CreatedAt,
+            })
+            .ToListAsync();
+
+        return View("Landing", listings);
     }
 
     public IActionResult Journey()
@@ -236,7 +261,7 @@ public class HomeController : Controller
         if (result.Succeeded)
         {
             // role-based redirect — use the signed-in principal directly
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.FindByEmailAsync(model.Email.Trim());
             if (user != null)
             {
                 if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))

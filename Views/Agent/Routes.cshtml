@@ -37,6 +37,20 @@ else
             <div class="dash-panel__header">
                 <h2 class="dash-panel__title">@vehicle.NumberPlate <span class="td-muted">· @vehicle.VehicleType · @vehicle.CompanyName</span></h2>
             </div>
+            @if (vehicle.IsAwaitingDeposit)
+            {
+                <div class="alert alert-info">
+                    This vehicle is temporarily held for an awarded bid while the goods owner completes the 70% deposit. Route updates and new bids are paused until payment or award cancellation.
+                </div>
+            }
+            else
+            {
+                @if (vehicle.IsReservedForActiveCargo)
+                {
+                    <div class="alert alert-info">
+                        This vehicle is reserved for a paid cargo booking. You may update its current route, but it will remain unavailable for new bids.
+                    </div>
+                }
             <form asp-action="UpdateRoute" method="post" class="row g-3">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="VehicleId" value="@vehicle.VehicleId" />
@@ -79,6 +93,7 @@ else
                     <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update Route</button>
                 </div>
             </form>
+            }
         </div>
     }
 }

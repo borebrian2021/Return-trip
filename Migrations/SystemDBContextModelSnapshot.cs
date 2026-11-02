@@ -30,6 +30,7 @@ namespace Return_trip.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Percentage")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -119,6 +120,7 @@ namespace Return_trip.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("DistanceKm")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("FromLatitude")
@@ -275,11 +277,29 @@ namespace Return_trip.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("DepositAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("DepositPaidAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("DriverId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("EstimatedVehicleArrivalAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("NotStarted");
 
                     b.Property<int?>("PriceDecidedByGoodsOwnerId")
                         .HasColumnType("int");
@@ -302,14 +322,22 @@ namespace Return_trip.Migrations
                     b.Property<string>("SuggestionComments")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("TripAssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TripStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasDefaultValue("AwaitingDeposit");
+
                     b.Property<int>("VehicleRouteId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyAgentId");
-
-                    b.HasIndex("DriverId");
 
                     b.HasIndex("PriceDecidedByGoodsOwnerId");
 
@@ -318,9 +346,61 @@ namespace Return_trip.Migrations
                     b.HasIndex("CargoId", "CompanyAgentId")
                         .IsUnique();
 
+                    b.HasIndex("DriverId", "TripStatus");
+
                     b.HasIndex("Status", "CreatedAt");
 
                     b.ToTable("CargoBids");
+                });
+
+            modelBuilder.Entity("CargoPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CargoBidId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SubmittedByUserAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VerificationComments")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("VerifiedByCompanyAgentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CargoBidId");
+
+                    b.HasIndex("Reference")
+                        .IsUnique();
+
+                    b.ToTable("CargoPayments");
                 });
 
             modelBuilder.Entity("CompanyAgent", b =>
@@ -522,6 +602,18 @@ namespace Return_trip.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LastCargoTransported")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastCargoUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastDeliveryAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastTripReference")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("LicenseImageType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -559,6 +651,53 @@ namespace Return_trip.Migrations
                     b.HasIndex("VehicleOwnerId");
 
                     b.ToTable("Drivers");
+                });
+
+            modelBuilder.Entity("FuelAdvance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CargoBidId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ReconciledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ReconciledByCompanyAgentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CargoBidId");
+
+                    b.HasIndex("Reference")
+                        .IsUnique();
+
+                    b.ToTable("FuelAdvances");
                 });
 
             modelBuilder.Entity("GoodsOwner", b =>
@@ -784,6 +923,39 @@ namespace Return_trip.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TripActivity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Activity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("CargoBidId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("UserAccountId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CargoBidId");
+
+                    b.ToTable("TripActivities");
+                });
+
             modelBuilder.Entity("UserAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -877,6 +1049,7 @@ namespace Return_trip.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal?>("Capacity")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("CompanyId")
@@ -1148,6 +1321,17 @@ namespace Return_trip.Migrations
                     b.Navigation("VehicleRoute");
                 });
 
+            modelBuilder.Entity("CargoPayment", b =>
+                {
+                    b.HasOne("CargoBid", "CargoBid")
+                        .WithMany("Payments")
+                        .HasForeignKey("CargoBidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CargoBid");
+                });
+
             modelBuilder.Entity("CompanyAgent", b =>
                 {
                     b.HasOne("CompanyRegistration", "Company")
@@ -1234,6 +1418,17 @@ namespace Return_trip.Migrations
                     b.Navigation("VehicleOwner");
                 });
 
+            modelBuilder.Entity("FuelAdvance", b =>
+                {
+                    b.HasOne("CargoBid", "CargoBid")
+                        .WithMany("FuelAdvances")
+                        .HasForeignKey("CargoBidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CargoBid");
+                });
+
             modelBuilder.Entity("GoodsOwner", b =>
                 {
                     b.HasOne("UserAccount", "UserAccount")
@@ -1313,6 +1508,17 @@ namespace Return_trip.Migrations
                     b.Navigation("VehicleOwner");
                 });
 
+            modelBuilder.Entity("TripActivity", b =>
+                {
+                    b.HasOne("CargoBid", "CargoBid")
+                        .WithMany("Activities")
+                        .HasForeignKey("CargoBidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CargoBid");
+                });
+
             modelBuilder.Entity("VehicleDetail", b =>
                 {
                     b.HasOne("CompanyRegistration", "Company")
@@ -1369,7 +1575,13 @@ namespace Return_trip.Migrations
 
             modelBuilder.Entity("CargoBid", b =>
                 {
+                    b.Navigation("Activities");
+
                     b.Navigation("DeliveryReceipt");
+
+                    b.Navigation("FuelAdvances");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("CompanyAgent", b =>

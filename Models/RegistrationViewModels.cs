@@ -237,6 +237,8 @@ public class AgentVehicleRouteViewModel
     public decimal? ToLongitude { get; set; }
     public DateTime? DepartureDate { get; set; }
     public DateTime? ReturnDate { get; set; }
+    public bool IsAwaitingDeposit { get; set; }
+    public bool IsReservedForActiveCargo { get; set; }
 }
 
 public class AgentRouteUpdateViewModel
@@ -403,9 +405,11 @@ public class PostCargoViewModel
     public string PackageType { get; set; } = string.Empty;
 
     [Required]
-    [Range(0.001, 100000, ErrorMessage = "Weight must be greater than 0.")]
-    [Display(Name = "Weight (kg)")]
-    public decimal WeightKg { get; set; }
+    [Range(0.2, 30, ErrorMessage = "Weight must be between 0.2 and 30 tonnes.")]
+    [Display(Name = "Weight (tonnes)")]
+    public decimal WeightTonnes { get; set; }
+
+    public bool TermsAccepted { get; set; }
 
     // ── Pricing ─────────────────────────────────────────────────────────────
     [Required]
@@ -490,7 +494,7 @@ public class PostCargoViewModel
 
     // ── Payment terms ─────────────────────────────────────────────────────────
     [Required]
-    [Range(1, 90, ErrorMessage = "Retention period must be between 1 and 90 days.")]
+    [Range(3, 90, ErrorMessage = "Retention period must be between 3 and 90 days.")]
     [Display(Name = "Payment retention period (days)")]
     public int RetentionPeriodDays { get; set; } = 7;
 

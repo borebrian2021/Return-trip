@@ -1,6 +1,6 @@
 # Return Trip — Database Structure
 
-> Last updated to reflect current project state (October 2026).
+> Last updated to reflect current project state (November 2026).
 
 ---
 
@@ -18,6 +18,9 @@
 | `GoodsOwners` | `GoodsOwners` | Cargo shippers / clients |
 | `Cargoes` | `Cargoes` | Cargo listings posted for bidding |
 | `CargoBids` | `CargoBids` | Bids placed by Agents on Cargo listings |
+| `CargoPayments` | `CargoPayments` | Manually referenced final payments and agent verification |
+| `FuelAdvances` | `FuelAdvances` | Separate fuel payments and reconciliation decisions |
+| `TripActivities` | `TripActivities` | Timestamped trip and financial activity history |
 | `DeliveryReceipts` | `DeliveryReceipts` | Signed receipt uploaded by Driver, confirmed by Agent |
 | `BankDetails` | `BankDetails` | Bank account details (VehicleOwner or GoodsOwner) |
 | `Notifications` | `Notifications` | In-app notifications (UserAccount or VehicleOwner) |
@@ -189,6 +192,10 @@ Represents a planned vehicle trip. Agents post routes to advertise a vehicle wit
 | `LicenseImageUrl` | `string` | | File URL |
 | `LicenseImageType` | `string` | | File MIME type / extension |
 | `IsVerified` | `bool` | | Set to `true` when profile is claimed |
+| `LastCargoTransported` | `string?` | | Updated when an agent closes a verified trip |
+| `LastDeliveryAt` | `DateTime?` | | Signed delivery date for the last closed trip |
+| `LastTripReference` | `string?` | | Reference for the last closed trip |
+| `LastCargoUpdatedAt` | `DateTime?` | | Timestamp of the automatic profile update |
 | `CreatedAt` | `DateTime` | Default: `UtcNow` | |
 
 **Referenced by:** `CargoBids` (nullable), `DeliveryReceipts`
@@ -244,7 +251,7 @@ Cargo shipment listings. Supports two pricing modes and optional geo-coordinates
 | `CommissionPercent` | `decimal` | Precision (5,2) | |
 | `RetentionPeriodDays` | `int` | | |
 | `AdvancePaymentPercent` | `decimal` | Default: `70` | % paid upfront to agent |
-| `Status` | `string` | Default: `"Open"` | `"Open"`, `"Closed"`, etc. |
+| `Status` | `string` | Default: `"Open"` | Includes `"Open"`, `"Closed"`, `"AwaitingDeposit"`, and `"Booked"` |
 | `IsBidOpen` | `bool` | Default: `true` | |
 | `CreatedAt` | `DateTime` | Default: `UtcNow` | |
 
@@ -278,17 +285,74 @@ A bid placed by a CompanyAgent on behalf of a vehicle route for a cargo listing.
 | `SuggestionComments` | `string?` | | Notes on price suggestion |
 | `PriceSuggestionStatus` | `string` | Default: `"NotRequired"` | `"NotRequired"`, `"Pending"`, `"Accepted"`, `"Rejected"` |
 | `PriceDecisionAt` | `DateTime?` | | When goods owner responded to suggestion |
+| `PaymentStatus` | `string` | Default: `"NotStarted"` | `"NotStarted"`, `"AwaitingDeposit"`, `"Paid"`, `"Cancelled"` |
+| `DepositAmount` | `decimal?` | Precision (18,2) | 70% of the awarded bid |
+| `DepositPaidAt` | `DateTime?` | | Set after deposit confirmation |
+| `PaymentReference` | `string?` | Max 100 chars | Provider or development-simulation reference |
 | `EstimatedVehicleArrivalAt` | `DateTime?` | | Estimated pickup time |
 | `Status` | `string` | Default: `"Pending"` | `"Pending"`, `"Accepted"`, `"Rejected"`, `"Completed"` |
 | `CreatedAt` | `DateTime` | Default: `UtcNow` | |
 | `AcceptedAt` | `DateTime?` | | |
 | `CompletedAt` | `DateTime?` | | |
+| `TripStatus` | `string` | Max 40 chars | Driver workflow stage, from deposit/pickup through closure |
+| `TripAssignedAt` | `DateTime?` | | Driver assignment timestamp |
 
 **Indexes:**
 - Unique: `(CargoId, CompanyAgentId)` — one bid per agent per cargo listing
 - Composite: `(Status, CreatedAt)` — for status-filtered queries
 
 **Referenced by:** `DeliveryReceipts` (one-to-one)
+
+---
+
+### CargoPayments
+
+Manual final-payment references submitted by the goods owner. A unique index prevents a reference from being reused across cargo bids; only the assigned company agent can confirm or reject it.
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `Id` | `int` | PK, Identity | |
+| `CargoBidId` | `int` | FK → `CargoBids` (Cascade) | |
+| `Amount` | `decimal` | Precision (18,2) | |
+| `Reference` | `string` | Max 100 chars, unique | |
+| `Status` | `string` | Max 30 chars | `"PendingVerification"`, `"Confirmed"`, or `"Rejected"` |
+| `SubmittedByUserAccountId` | `int` | | Goods owner account |
+| `VerifiedByCompanyAgentId` | `int?` | | Agent who reviewed the reference |
+| `SubmittedAt` / `VerifiedAt` | `DateTime` / `DateTime?` | | Audit timestamps |
+| `VerificationComments` | `string?` | | Agent review notes |
+
+---
+
+### FuelAdvances
+
+Separate advances for fuel, tracked independently from the deposit and final payment. A reconciled amount is deducted from the final balance; pending adjustments block payment approval and handover.
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `Id` | `int` | PK, Identity | |
+| `CargoBidId` | `int` | FK → `CargoBids` (Cascade) | |
+| `Amount` | `decimal` | Precision (18,2) | |
+| `Reference` | `string` | Max 100 chars, unique | |
+| `PaidAt` | `DateTime` | | Starts the three-day reconciliation window |
+| `EvidenceUrl` | `string?` | | Optional evidence reference |
+| `Status` | `string` | Max 30 chars | `"PendingReconciliation"` or `"Reconciled"` |
+| `ReconciledByCompanyAgentId` | `int?` | | Agent who approved the adjustment |
+| `ReconciledAt` | `DateTime?` | | Reconciliation timestamp |
+
+---
+
+### TripActivities
+
+Append-only operational history for trip assignments, status changes, payment decisions, fuel reconciliation, evidence review, and closure.
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| `Id` | `int` | PK, Identity | |
+| `CargoBidId` | `int` | FK → `CargoBids` (Cascade) | |
+| `UserAccountId` | `int?` | | User who performed the activity |
+| `Activity` | `string` | Max 100 chars | Activity type |
+| `Details` | `string?` | Max 1,000 chars | Human-readable audit detail |
+| `CreatedAt` | `DateTime` | Default: `UtcNow` | |
 
 ---
 
@@ -404,7 +468,8 @@ AdminCommissionSettings  (standalone)
 | **Identity integration** | `UserAccounts` extends `IdentityUser<int>`, so PK is `int` not `Guid`. `SystemDBContext` extends `IdentityDbContext<UserAccount, IdentityRole<int>, int>`. |
 | **Two-phase registration** | Drivers and Agents are pre-registered by the VehicleOwner (profile only). They later "claim" the profile by matching their ID number or email, then set a password. `UserAccountId` is nullable on both; it gets set on claim. |
 | **Bids are agent-to-cargo** | `CargoBid` links a `CompanyAgent` + `VehicleRoute` to a `Cargo`. Drivers are optionally assigned afterward. The unique constraint is `(CargoId, CompanyAgentId)`. |
-| **Price negotiation workflow** | `CargoBid` has a full price negotiation sub-flow: `SuggestedAmount`, `PriceSuggestionStatus`, `PriceDecisionAt`, `PriceDecidedByGoodsOwnerId`. |
+| **Price negotiation workflow** | Agents may submit a suggested price with a reason. Goods owners review it in their authenticated bids page; accepting it updates the bid amount, while rejecting it leaves the original bid available. SMTP email delivery is implemented but intentionally not triggered until SMTP settings are supplied. |
+| **Bid award and deposit** | Awarding one bid closes the cargo listing and rejects competing bids. The vehicle is held from new bids while the 70% deposit is pending; after confirmation, its route is changed to the cargo route. An owner can cancel an unpaid award to reopen the cargo and release the vehicle. Deposit simulation is available only in Development; Paystack processing is not yet integrated. |
 | **Geo-matching support** | Both `Cargo` and `VehicleRoute` store place IDs + lat/long, and `VehicleRoute` supports a full GeoJSON `RoutePathJson` for corridor-based route matching. |
 | **Cascade vs Restrict** | VehicleOwner → Company/Agents/Drivers/Routes all cascade. UserAccount FKs use Restrict or SetNull to prevent accidentally deleting a user taking out profile records. |
 | **Status fields are strings** | `Cargo.Status`, `CargoBid.Status`, `CargoBid.PriceSuggestionStatus`, `DeliveryReceipt.ConfirmationStatus` are plain `string` columns; no database enums. |

@@ -1,5 +1,31 @@
-﻿@{
+﻿@model IReadOnlyList<CargoListingRow>
+@{
     Layout = null;
+}
+@functions {
+    private static string GetCargoCategory(string packageType)
+    {
+        if (packageType.Contains("bulk", StringComparison.OrdinalIgnoreCase) ||
+            packageType.Contains("loose", StringComparison.OrdinalIgnoreCase))
+            return "bulk";
+        if (packageType.Contains("pallet", StringComparison.OrdinalIgnoreCase))
+            return "palletised";
+        if (packageType.Contains("refrigerat", StringComparison.OrdinalIgnoreCase))
+            return "refrigerated";
+        if (packageType.Contains("machin", StringComparison.OrdinalIgnoreCase) ||
+            packageType.Contains("plant", StringComparison.OrdinalIgnoreCase))
+            return "machinery";
+        return "other";
+    }
+
+    private static string GetCargoIcon(string category) => category switch
+    {
+        "bulk" => "fa-box-open",
+        "palletised" => "fa-pallet",
+        "refrigerated" => "fa-snowflake",
+        "machinery" => "fa-cogs",
+        _ => "fa-box",
+    };
 }
 <!doctype html>
 <html lang="en">
@@ -78,9 +104,9 @@
 
             <div class="row align-items-end mb-5">
                 <div class="col-lg-5">
-                    <h2 class="section-title mb-2">Open Freight Listings</h2>
+                    <h2 class="section-title mb-2">Latest Open Freight Listings</h2>
                     <p class="mb-0">
-                        Live cargo posted by goods owners across Kenya.
+                        The latest cargo posted by goods owners across Kenya.
                         Drivers and agents can bid on any open load heading their route.
                     </p>
                 </div>
@@ -91,165 +117,71 @@
                         <button class="freight-tab" data-filter="palletised">Palletised</button>
                         <button class="freight-tab" data-filter="refrigerated">Refrigerated</button>
                         <button class="freight-tab" data-filter="machinery">Machinery</button>
+                        <button class="freight-tab" data-filter="other">Other</button>
                     </div>
                 </div>
             </div>
 
             <div class="row" id="freight-cards">
-
-                <!-- Card 1 – Bulk -->
-                <div class="col-12 col-md-6 col-lg-3 mb-5" data-type="bulk">
-                    <div class="product-item freight-card">
-                        <span class="freight-badge freight-badge--open">Open</span>
-                        <img src="~/images/vehicles/balast.jpg" class="img-fluid product-thumbnail" alt="Crushed Stone">
-                        <div class="freight-body">
-                            <div class="freight-type-row">
-                                <span class="freight-type-pill"><i class="fa fa-box-open me-1"></i>Bulk</span>
-                                <span class="freight-weight"><i class="fa fa-weight-hanging me-1"></i>14,000 kg</span>
-                            </div>
-                            <h3 class="freight-route">Nairobi <span class="route-arrow">&#8594;</span> Mombasa</h3>
-                            <p class="freight-cargo-name">Crushed Stone</p>
-                            <div class="freight-details-grid">
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Departs</span>
-                                    <span class="detail-value">22 Oct 2026</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Bids</span>
-                                    <span class="detail-value">3 received</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Guide Price</span>
-                                    <span class="detail-value freight-price">KSh 85,000</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Package</span>
-                                    <span class="detail-value">Loose load</span>
-                                </div>
-                            </div>
-                            <a href="/Home/Register" class="btn btn-primary freight-bid-btn">
-                                <i class="fa fa-gavel me-2"></i>Place Bid
-                            </a>
-                        </div>
+                @if (Model.Count == 0)
+                {
+                    <div class="col-12 text-center py-5">
+                        <i class="fa fa-box-open mb-3" style="font-size:36px;color:#9a9a9a;" aria-hidden="true"></i>
+                        <h3>No open cargo listings yet</h3>
+                        <p>New listings from goods owners will appear here.</p>
+                        <a href="/Home/RegisterGoodsOwner" class="btn btn-primary">Post Cargo</a>
                     </div>
-                </div>
-
-                <!-- Card 2 – Palletised -->
-                <div class="col-12 col-md-6 col-lg-3 mb-5" data-type="palletised">
-                    <div class="product-item freight-card">
-                        <span class="freight-badge freight-badge--open">Open</span>
-                        <img src="~/images/vehicles/cement.webp" class="img-fluid product-thumbnail" alt="Cement Bags">
-                        <div class="freight-body">
-                            <div class="freight-type-row">
-                                <span class="freight-type-pill"><i class="fa fa-pallet me-1"></i>Palletised</span>
-                                <span class="freight-weight"><i class="fa fa-weight-hanging me-1"></i>6,000 kg</span>
+                }
+                else
+                {
+                    @foreach (var cargo in Model)
+                    {
+                        var category = GetCargoCategory(cargo.PackageType);
+                        var icon = GetCargoIcon(category);
+                        <div class="col-12 col-md-6 col-lg-3 mb-5" data-type="@category">
+                            <div class="product-item freight-card">
+                                <span class="freight-badge freight-badge--open">Open</span>
+                                <div class="freight-placeholder" aria-hidden="true">
+                                    <i class="fa @icon"></i>
+                                </div>
+                                <div class="freight-body">
+                                    <div class="freight-type-row">
+                                        <span class="freight-type-pill"><i class="fa @icon me-1"></i>@cargo.PackageType</span>
+                                        <span class="freight-weight"><i class="fa fa-weight-hanging me-1"></i>@cargo.WeightKg.ToString("N0") kg</span>
+                                    </div>
+                                    <h3 class="freight-route">@cargo.Route</h3>
+                                    <p class="freight-cargo-name">@cargo.Title</p>
+                                    <div class="freight-details-grid">
+                                        <div class="freight-detail-item">
+                                            <span class="detail-label">Departs</span>
+                                            <span class="detail-value">@(cargo.RequiredDepartureAt?.ToString("dd MMM yyyy") ?? "Flexible")</span>
+                                        </div>
+                                        <div class="freight-detail-item">
+                                            <span class="detail-label">Bids</span>
+                                            <span class="detail-value">@cargo.BidCount bid@(cargo.BidCount == 1 ? "" : "s") received</span>
+                                        </div>
+                                        <div class="freight-detail-item">
+                                            <span class="detail-label">Guide Price</span>
+                                            <span class="detail-value freight-price">KSh @cargo.TransportCost.ToString("N0")</span>
+                                        </div>
+                                        <div class="freight-detail-item">
+                                            <span class="detail-label">Deliver by</span>
+                                            <span class="detail-value">@(cargo.DeliveryDeadlineAt?.ToString("dd MMM yyyy") ?? "Not specified")</span>
+                                        </div>
+                                    </div>
+                                    <a href="/Home/Register" class="btn btn-primary freight-bid-btn">
+                                        <i class="fa fa-gavel me-2"></i>Place Bid
+                                    </a>
+                                </div>
                             </div>
-                            <h3 class="freight-route">Mombasa <span class="route-arrow">&#8594;</span> Nairobi</h3>
-                            <p class="freight-cargo-name">Cement Bags</p>
-                            <div class="freight-details-grid">
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Departs</span>
-                                    <span class="detail-value">24 Oct 2026</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Bids</span>
-                                    <span class="detail-value">1 received</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Guide Price</span>
-                                    <span class="detail-value freight-price">KSh 42,000</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Package</span>
-                                    <span class="detail-value">Pallets ×12</span>
-                                </div>
-                            </div>
-                            <a href="/Home/Register" class="btn btn-primary freight-bid-btn">
-                                <i class="fa fa-gavel me-2"></i>Place Bid
-                            </a>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Card 3 – Machinery -->
-                <div class="col-12 col-md-6 col-lg-3 mb-5" data-type="machinery">
-                    <div class="product-item freight-card">
-                        <span class="freight-badge freight-badge--urgent">Urgent</span>
-                        <img src="~/images/vehicles/canter.webp" class="img-fluid product-thumbnail" alt="Generator">
-                        <div class="freight-body">
-                            <div class="freight-type-row">
-                                <span class="freight-type-pill urgent"><i class="fa fa-cogs me-1"></i>Machinery</span>
-                                <span class="freight-weight"><i class="fa fa-weight-hanging me-1"></i>3,200 kg</span>
-                            </div>
-                            <h3 class="freight-route">Kisumu <span class="route-arrow">&#8594;</span> Nairobi</h3>
-                            <p class="freight-cargo-name">Industrial Generator</p>
-                            <div class="freight-details-grid">
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Departs</span>
-                                    <span class="detail-value">21 Oct 2026</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Bids</span>
-                                    <span class="detail-value">0 received</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Guide Price</span>
-                                    <span class="detail-value freight-price">KSh 58,000</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Package</span>
-                                    <span class="detail-value">Crated</span>
-                                </div>
-                            </div>
-                            <a href="/Home/Register" class="btn btn-primary freight-bid-btn">
-                                <i class="fa fa-gavel me-2"></i>Place Bid
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 4 – Refrigerated -->
-                <div class="col-12 col-md-6 col-lg-3 mb-5" data-type="refrigerated">
-                    <div class="product-item freight-card">
-                        <span class="freight-badge freight-badge--open">Open</span>
-                        <img src="~/images/vehicles/cargo2.jpg" class="img-fluid product-thumbnail" alt="Fresh Produce">
-                        <div class="freight-body">
-                            <div class="freight-type-row">
-                                <span class="freight-type-pill"><i class="fa fa-snowflake me-1"></i>Refrigerated</span>
-                                <span class="freight-weight"><i class="fa fa-weight-hanging me-1"></i>8,000 kg</span>
-                            </div>
-                            <h3 class="freight-route">Nakuru <span class="route-arrow">&#8594;</span> Mombasa</h3>
-                            <p class="freight-cargo-name">Fresh Produce</p>
-                            <div class="freight-details-grid">
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Departs</span>
-                                    <span class="detail-value">25 Oct 2026</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Bids</span>
-                                    <span class="detail-value">5 received</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Guide Price</span>
-                                    <span class="detail-value freight-price">KSh 61,000</span>
-                                </div>
-                                <div class="freight-detail-item">
-                                    <span class="detail-label">Package</span>
-                                    <span class="detail-value">Temp controlled</span>
-                                </div>
-                            </div>
-                            <a href="/Home/Register" class="btn btn-primary freight-bid-btn">
-                                <i class="fa fa-gavel me-2"></i>Place Bid
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
+                    }
+                }
             </div>
 
             <div class="row">
                 <div class="col-12 text-center mt-2">
-                    <a href="/Home/Register" class="btn">View All Listings</a>
+                    <a href="/Home/Register" class="btn">Register to Place a Bid</a>
                 </div>
             </div>
 
@@ -645,6 +577,11 @@
 
         </div>
     </footer>
+
+    <button type="button" class="site-scroll-top" id="siteScrollTop"
+            aria-label="Scroll back to top" title="Scroll back to top">
+        <i class="fa fa-arrow-up" aria-hidden="true"></i>
+    </button>
 
     <script src="~/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/tiny-slider.js"></script>

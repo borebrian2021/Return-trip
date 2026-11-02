@@ -18,6 +18,10 @@ public class Driver
     public string LicenseImageUrl { get; set; } = string.Empty;
     public string LicenseImageType { get; set; } = string.Empty;
     public bool IsVerified { get; set; }
+    public string? LastCargoTransported { get; set; }
+    public DateTime? LastDeliveryAt { get; set; }
+    public string? LastTripReference { get; set; }
+    public DateTime? LastCargoUpdatedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<CargoBid> Bids { get; set; } = new List<CargoBid>();

@@ -39,3 +39,4 @@ appsettings.*.Local.json
 # Private company registration certificates
 /App_Data/company-certificates/
 /App_Data/vehicle-documents/
+/App_Data/DeliveryEvidence/

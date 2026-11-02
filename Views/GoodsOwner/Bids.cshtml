@@ -1,0 +1,169 @@
+@model GoodsOwnerBidsViewModel
+@{
+    Layout = "_DashboardLayout";
+    var allowDepositSimulation = ViewData["AllowDepositSimulation"] is true;
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-gavel me-2" style="color:#1a3c5e;font-size:20px;"></i>Bids Received</h1>
+        <p class="dash-page-header__sub">Review transport offers, respond to price suggestions, and award a vehicle booking.</p>
+    </div>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (!Model.Bids.Any())
+{
+    <div class="dash-panel">
+        <div class="dash-empty">
+            <i class="fa fa-gavel"></i>
+            <p>No bids have been received on your cargo listings yet.</p>
+            <a asp-action="MyListings" class="dash-btn dash-btn--outline">View my listings</a>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var bid in Model.Bids)
+    {
+        <div class="dash-panel mb-4">
+            <div class="dash-panel__header">
+                <div>
+                    <h2 class="dash-panel__title">@bid.CargoTitle</h2>
+                    <span class="td-muted">@bid.CargoRoute · @bid.PackageType · @bid.WeightKg.ToString("N0") kg</span>
+                </div>
+                <span class="status-pill status-pill--@bid.BidStatus.ToLowerInvariant()">@bid.BidStatus</span>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Agent:</strong> @bid.AgentName · @bid.CompanyName</p>
+                    <p class="mb-1"><strong>Vehicle:</strong> @bid.VehicleRegistration</p>
+                    <p class="mb-1"><strong>Goods owner guide price:</strong> KSh @bid.CargoAskingPrice.ToString("N2")</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Agent bid:</strong> KSh @bid.BidAmount.ToString("N2")</p>
+                    @if (bid.SuggestedAmount.HasValue)
+                    {
+                        <p class="mb-1"><strong>Suggested transport price:</strong> KSh @bid.SuggestedAmount.Value.ToString("N2")</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(bid.SuggestionComments))
+                    {
+                        <p class="mb-1"><strong>Reason:</strong> @bid.SuggestionComments</p>
+                    }
+                    <p class="mb-1"><strong>Deposit:</strong> @bid.PaymentStatus
+                        @if (bid.DepositAmount.HasValue)
+                        {
+                            <span>· KSh @bid.DepositAmount.Value.ToString("N2")</span>
+                        }
+                    </p>
+                </div>
+            </div>
+
+            @if (bid.PriceSuggestionStatus == "Pending")
+            {
+                <div class="alert alert-info">
+                    Price suggestion is awaiting your decision. Email notifications are currently paused until SMTP is configured; this dashboard is the source of truth.
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <form asp-action="ReviewPriceSuggestion" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@bid.BidId" />
+                        <input type="hidden" name="accept" value="true" />
+                        <button type="submit" class="btn btn-success">Accept suggested price</button>
+                    </form>
+                    <form asp-action="ReviewPriceSuggestion" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@bid.BidId" />
+                        <input type="hidden" name="accept" value="false" />
+                        <button type="submit" class="btn btn-outline-danger">Reject suggestion</button>
+                    </form>
+                </div>
+            }
+
+            @if (bid.BidStatus == "Pending" && bid.PriceSuggestionStatus != "Pending")
+            {
+                <div class="d-flex flex-wrap gap-2">
+                    <form asp-action="DecideBid" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@bid.BidId" />
+                        <input type="hidden" name="accept" value="true" />
+                        <button type="submit" class="btn btn-primary">Award this bid</button>
+                    </form>
+                    <form asp-action="DecideBid" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@bid.BidId" />
+                        <input type="hidden" name="accept" value="false" />
+                        <button type="submit" class="btn btn-outline-danger">Reject bid</button>
+                    </form>
+                </div>
+            }
+
+            @if (bid.BidStatus == "Accepted" && bid.PaymentStatus == "AwaitingDeposit")
+            {
+                <div class="alert alert-warning">
+                    The vehicle is temporarily held for this booking while the 70% deposit is pending. Its cargo route activates when payment is confirmed.
+                </div>
+                @if (allowDepositSimulation)
+                {
+                    <form asp-action="SimulateDepositPayment" method="post" class="mb-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@bid.BidId" />
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fa fa-flask me-2"></i>Simulate 70% deposit (Development only)
+                        </button>
+                    </form>
+                }
+                <form asp-action="CancelAward" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@bid.BidId" />
+                    <button type="submit" class="btn btn-outline-danger">Cancel award &amp; reopen cargo</button>
+                </form>
+            }
+
+            @if (bid.BidStatus == "Accepted" && bid.PaymentStatus == "Paid")
+            {
+                <div class="alert alert-success mb-0">
+                    Deposit confirmed. Vehicle @bid.VehicleRegistration is reserved and its route now reflects this cargo journey.
+                </div>
+            }
+
+            @if (bid.BidStatus == "Accepted" && bid.TripStatus is "ArrivedAtDestination" or "AwaitingFinalPayment")
+            {
+                <div class="alert alert-warning mt-3">
+                    <strong>Final balance due:</strong> KSh @bid.FinalBalance.ToString("N2")
+                    @if (bid.FinalPaymentStatus == "PendingVerification")
+                    {
+                        <div>Reference @bid.FinalPaymentReference is awaiting agent verification. Handover remains locked.</div>
+                    }
+                    else
+                    {
+                        <form asp-action="SubmitFinalPayment" method="post" class="row g-2 mt-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="BidId" value="@bid.BidId" />
+                            <div class="col-md-5">
+                                <label class="form-label" for="final-ref-@bid.BidId">Transaction reference</label>
+                                <input class="form-control" id="final-ref-@bid.BidId" name="Reference" maxlength="100" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="final-amount-@bid.BidId">Amount (KSh)</label>
+                                <input class="form-control" id="final-amount-@bid.BidId" name="Amount" type="number" min="0.01" step="0.01" value="@bid.FinalBalance.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" required />
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-primary" type="submit">Submit for verification</button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+}

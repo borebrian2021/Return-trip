@@ -23,6 +23,19 @@
     </div>
 </div>
 
+<div class="goods-welcome-modal" id="goodsWelcomeModal" hidden>
+    <div class="goods-welcome-modal__backdrop" data-close-welcome></div>
+    <div class="goods-welcome-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="goodsWelcomeTitle">
+        <button type="button" class="goods-welcome-modal__close" data-close-welcome aria-label="Close welcome message">&times;</button>
+        <div class="goods-welcome-modal__icon"><i class="fa fa-box-open" aria-hidden="true"></i></div>
+        <p class="auth-card__eyebrow">Goods Owner Workspace</p>
+        <h2 id="goodsWelcomeTitle">Welcome to Return Trip</h2>
+        <p>Post your first cargo listing, compare vehicles available on your route, and choose the transport option that fits your delivery.</p>
+        <a asp-action="PostCargo" class="dash-btn dash-btn--primary"><i class="fa fa-plus me-2"></i>Post your first cargo</a>
+        <button type="button" class="goods-welcome-modal__later" data-close-welcome>Continue to dashboard</button>
+    </div>
+</div>
+
 <!-- ── Stat cards ───────────────────────────────────────────────────────────── -->
 <div class="dash-stat-grid">
 
@@ -39,8 +52,8 @@
         </div>
     </div>
 
-    <div class="dash-stat-card">
-        <div class="dash-stat-card__icon dash-stat-card__icon--amber">
+    <div class="dash-stat-card dash-stat-card--priority">
+        <div class="dash-stat-card__icon dash-stat-card__icon--green">
             <i class="fa fa-gavel"></i>
         </div>
         <div class="dash-stat-card__body">
@@ -48,7 +61,7 @@
             <div class="dash-stat-card__label">Active Bids</div>
             @if (Model.PendingPriceDecisions > 0)
             {
-                <span class="dash-stat-card__badge dash-stat-card__badge--amber">
+                <span class="dash-stat-card__badge dash-stat-card__badge--green">
                     <i class="fa fa-exclamation-circle" style="font-size:9px;"></i>
                     @Model.PendingPriceDecisions awaiting decision
                 </span>
@@ -223,6 +236,18 @@
 @section Scripts {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+    (function () {
+        const welcome = document.getElementById('goodsWelcomeModal');
+        const key = 'returnTrip.goodsOwnerWelcomeShown';
+        if (welcome && !window.localStorage.getItem(key)) {
+            welcome.hidden = false;
+            window.localStorage.setItem(key, 'true');
+        }
+        welcome?.querySelectorAll('[data-close-welcome]').forEach(function (element) {
+            element.addEventListener('click', function () { welcome.hidden = true; });
+        });
+    })();
+
     const labels  = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyListings.Select(m => m.Month)));
     const data    = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyListings.Select(m => m.Count)));
 

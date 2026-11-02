@@ -1,0 +1,181 @@
+@model Return_trip.Models.AgentTripsViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["DashRole"] = "CompanyAgent";
+    ViewData["ActiveNav"] = "trips";
+    ViewData["Title"] = "Trip Verification";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-clipboard-check me-2" style="color:#d4890a;font-size:20px;"></i>Trip Verification</h1>
+        <p class="dash-page-header__sub">Assign drivers, reconcile separate fuel advances, verify manual payments, and review delivery evidence.</p>
+    </div>
+</div>
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-warning" role="alert">@error</div>
+}
+
+@if (Model.Trips.Count == 0)
+{
+    <div class="dash-panel">
+        <div class="dash-empty">
+            <i class="fa fa-clipboard-check"></i>
+            <p>No awarded trips are awaiting management.</p>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var trip in Model.Trips)
+    {
+        <section class="dash-panel mb-4">
+            <div class="dash-panel__header">
+                <div>
+                    <h2 class="dash-panel__title">@trip.Reference · @trip.CargoTitle</h2>
+                    <span class="td-muted">Driver: @trip.DriverName</span>
+                </div>
+                <span class="status-pill">@trip.TripStatus</span>
+            </div>
+
+            <div class="trip-review-body">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <p><strong>Trip cost:</strong> KSh @trip.TripCost.ToString("N2")</p>
+                    <p><strong>Confirmed deposit:</strong> KSh @trip.Deposit.ToString("N2")</p>
+                    <p><strong>Reconciled fuel credit:</strong> KSh @trip.ReconciledFuel.ToString("N2")</p>
+                    <p><strong>Confirmed final payments:</strong> KSh @trip.ConfirmedFinalPayments.ToString("N2")</p>
+                    <p><strong>Outstanding:</strong> KSh @trip.Outstanding.ToString("N2")</p>
+                    <p><strong>Payment state:</strong> @trip.PaymentStatus</p>
+                </div>
+                <div class="col-md-7">
+                    @if (trip.Drivers.Count > 0)
+                    {
+                        <form asp-action="AssignDriver" method="post" class="row g-2 mb-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="BidId" value="@trip.BidId" />
+                            <div class="col-md-8">
+                                <label class="form-label" for="driver-@trip.BidId">Assign vehicle driver</label>
+                                <select class="form-select" id="driver-@trip.BidId" name="DriverId" required>
+                                    <option value="">Select driver</option>
+                                    @foreach (var driver in trip.Drivers)
+                                    {
+                                        <option value="@driver.Id" selected="@(trip.DriverId == driver.Id)">@driver.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-outline-primary" type="submit">Assign driver</button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="alert alert-warning">No driver account is linked to this vehicle. Ask the vehicle owner to assign and activate a driver.</p>
+                    }
+
+                    @if (trip.Deposit > 0 && trip.TripStatus != "Closed")
+                    {
+                        <form asp-action="RecordFuelAdvance" method="post" class="row g-2 mb-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="BidId" value="@trip.BidId" />
+                            <div class="col-sm-4">
+                                <label class="form-label" for="fuel-amount-@trip.BidId">Advance fuel (KSh)</label>
+                                <input class="form-control" id="fuel-amount-@trip.BidId" name="Amount" type="number" min="0.01" step="0.01" required />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label" for="fuel-ref-@trip.BidId">Transaction reference</label>
+                                <input class="form-control" id="fuel-ref-@trip.BidId" name="Reference" maxlength="100" required />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label" for="fuel-date-@trip.BidId">Payment date</label>
+                                <input class="form-control" id="fuel-date-@trip.BidId" name="PaidAt" type="datetime-local" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
+                            </div>
+                            <div class="col-12"><button class="btn btn-outline-secondary" type="submit">Record separate fuel payment</button></div>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            @if (trip.FuelAdvances.Count > 0)
+            {
+                <h3 class="h6 mt-3">Fuel advances and reconciliation</h3>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>Reference</th><th>Amount</th><th>Paid</th><th>Reconciliation status</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var fuel in trip.FuelAdvances)
+                        {
+                            var expired = fuel.Status == "PendingReconciliation" && DateTime.UtcNow > fuel.PaidAt.AddDays(3);
+                            <tr>
+                                <td>@fuel.Reference</td>
+                                <td>KSh @fuel.Amount.ToString("N2")</td>
+                                <td>@fuel.PaidAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                                <td>@fuel.Status @if (expired) { <span class="text-danger">· Past 3-day window</span> }</td>
+                                <td>
+                                    @if (fuel.Status == "PendingReconciliation")
+                                    {
+                                        <form asp-action="ReconcileFuel" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@fuel.Id" />
+                                            <button class="btn btn-sm btn-outline-primary" type="submit">Approve adjustment</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            @if (trip.PendingPayments.Count > 0)
+            {
+                <h3 class="h6 mt-3">Manual payments awaiting verification</h3>
+                @foreach (var payment in trip.PendingPayments)
+                {
+                    <div class="border rounded p-3 mb-2">
+                        <strong>@payment.Reference</strong> · KSh @payment.Amount.ToString("N2")
+                        <form asp-action="VerifyFinalPayment" method="post" class="row g-2 mt-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="PaymentId" value="@payment.Id" />
+                            <div class="col-md-7">
+                                <input class="form-control" name="Comments" maxlength="500" placeholder="Verification comments (required when rejecting)" />
+                            </div>
+                            <div class="col-md-5 d-flex gap-2">
+                                <button class="btn btn-success" name="approve" value="true" type="submit">Confirm payment</button>
+                                <button class="btn btn-outline-danger" name="approve" value="false" type="submit">Reject payment</button>
+                            </div>
+                        </form>
+                    </div>
+                }
+            }
+
+            @if (trip.DeliveryEvidenceName != null && trip.ReceiptStatus != null)
+            {
+                <h3 class="h6 mt-3">Delivery evidence · @trip.ReceiptStatus</h3>
+                <a asp-action="DeliveryEvidence" asp-route-id="@trip.DeliveryReceiptId" class="btn btn-sm btn-outline-secondary">View signed document (@trip.DeliveryEvidenceName)</a>
+                @if (trip.ReceiptStatus == "Pending")
+                {
+                    <form asp-action="ReviewDelivery" method="post" class="row g-2 mt-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@trip.DeliveryReceiptId" />
+                        <div class="col-md-7">
+                            <input class="form-control" name="comments" maxlength="500" placeholder="Agent remarks" />
+                        </div>
+                        <div class="col-md-5 d-flex gap-2">
+                            <button class="btn btn-success" name="approve" value="true" type="submit">Approve &amp; close trip</button>
+                            <button class="btn btn-outline-danger" name="approve" value="false" type="submit">Reject evidence</button>
+                        </div>
+                    </form>
+                }
+            }
+            </div>
+        </section>
+    }
+}

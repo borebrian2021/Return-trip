@@ -658,6 +658,14 @@ textarea { height: auto !important; }
   top: 0 !important;
   display: block;
 }
+.freight-placeholder {
+  display: grid;
+  place-items: center;
+  height: 180px;
+  background: linear-gradient(135deg, #eef3f7, #e6f4ee);
+  color: #1a3c5e;
+  font-size: 48px;
+}
 
 /* ── Status badge ────────────────────────────────────────────────────────────── */
 .freight-badge {
@@ -1359,6 +1367,74 @@ body.dash-body {
   padding: 28px 28px 40px;
 }
 
+.dash-scroll-top,
+.site-scroll-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #1a3c5e;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(21, 32, 46, .22);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease, background-color .2s ease;
+}
+.dash-scroll-top:not(.is-visible),
+.site-scroll-top:not(.is-visible) {
+  visibility: hidden;
+}
+.dash-scroll-top.is-visible,
+.site-scroll-top.is-visible {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.dash-scroll-top:hover,
+.dash-scroll-top:focus-visible,
+.site-scroll-top:hover,
+.site-scroll-top:focus-visible {
+  background: #0e7490;
+  color: #ffffff;
+  outline: none;
+}
+.cash-visibility-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1a3c5e;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.goods-welcome-modal[hidden] { display: none; }
+.goods-welcome-modal { position: fixed; inset: 0; z-index: 1100; display: grid; place-items: center; padding: 20px; }
+.goods-welcome-modal__backdrop { position: absolute; inset: 0; background: rgba(21, 32, 46, .52); }
+.goods-welcome-modal__dialog { position: relative; width: min(460px, 100%); padding: 32px; background: #fff; border-radius: 14px; box-shadow: 0 18px 50px rgba(0,0,0,.22); text-align: center; }
+.goods-welcome-modal__icon { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 18px; border-radius: 50%; background: #e6f4ee; color: #1a7a45; font-size: 22px; }
+.goods-welcome-modal__dialog h2 { margin: 0 0 10px; color: #2f2f2f; font-size: 24px; }
+.goods-welcome-modal__dialog p:not(.auth-card__eyebrow) { margin: 0 auto 22px; color: #6a6a6a; font-size: 14px; line-height: 1.6; }
+.goods-welcome-modal__close { position: absolute; top: 10px; right: 14px; border: 0; background: none; color: #6a6a6a; font-size: 24px; cursor: pointer; }
+.goods-welcome-modal__later { display: block; margin: 14px auto 0; padding: 0; border: 0; background: none; color: #7a8580; font-size: 12px; cursor: pointer; }
+@media (max-width: 600px) {
+  .dash-scroll-top,
+  .site-scroll-top { right: 16px; bottom: 16px; }
+}
+
 /* ── Page header row ─────────────────────────────────────────────────────────── */
 .dash-page-header {
   display: flex;
@@ -1402,6 +1478,10 @@ body.dash-body {
   box-shadow: 0 2px 8px rgba(0,0,0,.04);
   position: relative;
   overflow: hidden;
+}
+.dash-stat-card--priority {
+  border-color: #b7dfc8;
+  box-shadow: 0 4px 14px rgba(26, 122, 69, .12);
 }
 .dash-stat-card__icon {
   width: 46px;
@@ -1507,6 +1587,46 @@ body.dash-body {
   .dash-content .dash-panel .post-cargo-body {
     padding: 18px;
   }
+}
+
+/* Driver trip pages use the same inset spacing as other dashboard panels. */
+.driver-stat-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.driver-profile-body,
+.driver-trip-body,
+.trip-review-body {
+  padding: 24px;
+}
+.driver-profile-body .row,
+.driver-trip-body > .row {
+  --bs-gutter-y: 1.25rem;
+}
+.trip-review-body > .row,
+.trip-review-body form.row {
+  --bs-gutter-y: 1.25rem;
+}
+.driver-profile-body strong,
+.driver-profile-body span {
+  display: block;
+}
+.driver-profile-body strong {
+  margin-bottom: 4px;
+  color: #6a6a6a;
+  font-size: 12px;
+}
+.driver-profile-body span {
+  color: #2f2f2f;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1100px) {
+  .driver-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .driver-stat-grid { grid-template-columns: 1fr; }
+  .driver-profile-body,
+  .driver-trip-body,
+  .trip-review-body { padding: 18px; }
 }
 
 /* table inside panel */

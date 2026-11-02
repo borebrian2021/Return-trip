@@ -65,16 +65,19 @@
         </div>
     </div>
 
-    <div class="dash-stat-card">
+    <div class="dash-stat-card dash-stat-card--priority">
         <div class="dash-stat-card__icon dash-stat-card__icon--green">
             <i class="fa fa-coins"></i>
         </div>
         <div class="dash-stat-card__body">
-            <div class="dash-stat-card__value">KSh @Model.EarningsThisMonth.ToString("N0")</div>
+            <div class="dash-stat-card__value" id="earningsValue" data-amount="KSh @Model.EarningsThisMonth.ToString("N0")">KSh •••••</div>
             <div class="dash-stat-card__label">Earnings This Month</div>
             <span class="dash-stat-card__badge dash-stat-card__badge--green">
                 @Model.DeliveredThisMonth delivered
             </span>
+            <button type="button" class="cash-visibility-toggle" id="earningsToggle" aria-label="Show earnings" title="Show or hide earnings">
+                <i class="fa fa-eye" aria-hidden="true"></i> Show
+            </button>
         </div>
     </div>
 
@@ -93,13 +96,13 @@
     </div>
 
     <div class="dash-stat-card">
-        <div class="dash-stat-card__icon dash-stat-card__icon--amber">
+        <div class="dash-stat-card__icon dash-stat-card__icon--green">
             <i class="fa fa-gavel"></i>
         </div>
         <div class="dash-stat-card__body">
             <div class="dash-stat-card__value">@Model.ActiveBids</div>
             <div class="dash-stat-card__label">Active Bids</div>
-            <span class="dash-stat-card__badge dash-stat-card__badge--amber">Pending</span>
+            <span class="dash-stat-card__badge dash-stat-card__badge--green">Pending</span>
         </div>
     </div>
 
@@ -322,6 +325,17 @@
 </div>
 
 @section Scripts {
+<script>
+    document.getElementById('earningsToggle')?.addEventListener('click', function () {
+        const value = document.getElementById('earningsValue');
+        const visible = value.classList.toggle('is-visible');
+        value.textContent = visible ? value.dataset.amount : 'KSh •••••';
+        this.setAttribute('aria-label', visible ? 'Hide earnings' : 'Show earnings');
+        this.innerHTML = visible
+            ? '<i class="fa fa-eye-slash" aria-hidden="true"></i> Hide'
+            : '<i class="fa fa-eye" aria-hidden="true"></i> Show';
+    });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyBids.Select(m => m.Month)));

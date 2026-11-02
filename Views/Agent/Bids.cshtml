@@ -1,0 +1,67 @@
+@model AgentBidsPageViewModel
+@{
+    Layout = "_DashboardLayout";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-gavel me-2" style="color:#d4890a;font-size:20px;"></i>My Bids</h1>
+        <p class="dash-page-header__sub">Track your offers, price suggestions, and awarded vehicle bookings.</p>
+    </div>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (!Model.Bids.Any())
+{
+    <div class="dash-panel">
+        <div class="dash-empty">
+            <i class="fa fa-gavel"></i>
+            <p>You have not submitted any bids yet.</p>
+            <a asp-action="Marketplace" class="dash-btn dash-btn--primary">Browse open cargo</a>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var bid in Model.Bids)
+    {
+        <div class="dash-panel mb-3">
+            <div class="dash-panel__header">
+                <h2 class="dash-panel__title">@bid.CargoTitle</h2>
+                <span class="status-pill status-pill--@bid.BidStatus.ToLowerInvariant()">@bid.BidStatus</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Route:</strong> @bid.CargoRoute</p>
+                    <p class="mb-1"><strong>Vehicle:</strong> @bid.VehicleRegistration</p>
+                    <p class="mb-1"><strong>Your bid:</strong> KSh @bid.BidAmount.ToString("N2")</p>
+                    @if (bid.SuggestedAmount.HasValue)
+                    {
+                        <p class="mb-1"><strong>Suggested price:</strong> KSh @bid.SuggestedAmount.Value.ToString("N2") · @bid.PriceSuggestionStatus</p>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>Price suggestion:</strong> @bid.PriceSuggestionStatus</p>
+                    <p class="mb-1"><strong>Deposit:</strong> @bid.PaymentStatus
+                        @if (bid.DepositAmount.HasValue)
+                        {
+                            <span>· KSh @bid.DepositAmount.Value.ToString("N2")</span>
+                        }
+                    </p>
+                    @if (bid.PaymentStatus == "Paid")
+                    {
+                        <p class="text-success mb-0"><i class="fa fa-check-circle me-1"></i>Vehicle reserved and route updated for this cargo.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}

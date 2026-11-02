@@ -126,11 +126,40 @@
             }
             else if (role == "CompanyAgent")
             {
+                <p class="dash-nav-label">Cargo</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "marketplace" ? "active" : "")">
+                        <a asp-controller="Agent" asp-action="Marketplace">
+                            <i class="fa fa-box-open"></i><span>Open Cargo</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "bids" ? "active" : "")">
+                        <a asp-controller="Agent" asp-action="Bids">
+                            <i class="fa fa-gavel"></i><span>My Bids</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "trips" ? "active" : "")">
+                        <a asp-controller="Agent" asp-action="Trips">
+                            <i class="fa fa-clipboard-check"></i><span>Trip Verification</span>
+                        </a>
+                    </li>
+                </ul>
                 <p class="dash-nav-label">Fleet</p>
                 <ul>
                     <li class="@(ViewData["ActiveNav"]?.ToString() == "routes" ? "active" : "")">
                         <a asp-controller="Agent" asp-action="Routes">
                             <i class="fa fa-route"></i><span>Vehicle Routes</span>
+                        </a>
+                    </li>
+                </ul>
+            }
+            else if (role == "Driver")
+            {
+                <p class="dash-nav-label">Trips</p>
+                <ul>
+                    <li class="@(ViewData["ActiveNav"]?.ToString() == "driver-trips" ? "active" : "")">
+                        <a asp-controller="Driver" asp-action="Dashboard">
+                            <i class="fa fa-truck"></i><span>My Trips</span>
                         </a>
                     </li>
                 </ul>
@@ -160,6 +189,9 @@
                 <div class="dash-topbar__page-title">@ViewData["Title"]</div>
             </div>
             <div class="dash-topbar__right">
+                <a asp-controller="Notifications" asp-action="Index" class="dash-btn dash-btn--outline" aria-label="View notifications">
+                    <i class="fa fa-bell"></i><span>Notifications</span>
+                </a>
                 <div class="dash-topbar__user">
                     <div class="dash-topbar__avatar">
                         @{ var initials = (ViewData["UserInitials"] as string) ?? "?"; }
@@ -178,6 +210,11 @@
             @RenderBody()
         </main>
 
+        <button type="button" class="dash-scroll-top" id="dashScrollTop"
+                aria-label="Scroll back to top" title="Scroll back to top">
+            <i class="fa fa-arrow-up" aria-hidden="true"></i>
+        </button>
+
     </div>
     <!-- ── End Main area ──────────────────────────────────────────────────── -->
 
@@ -188,6 +225,17 @@
     // mobile sidebar toggle
     document.getElementById('sidebarToggle')?.addEventListener('click', function () {
         document.querySelector('.dash-sidebar').classList.toggle('dash-sidebar--open');
+    });
+
+    const dashboardContent = document.querySelector('.dash-content');
+    const scrollTopButton = document.getElementById('dashScrollTop');
+
+    dashboardContent?.addEventListener('scroll', function () {
+        scrollTopButton?.classList.toggle('is-visible', dashboardContent.scrollTop > 280);
+    }, { passive: true });
+
+    scrollTopButton?.addEventListener('click', function () {
+        dashboardContent?.scrollTo({ top: 0, behavior: 'smooth' });
     });
 </script>
 @await RenderSectionAsync("Scripts", required: false)

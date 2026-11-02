@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
+using Return_trip.Services;
 using Return_trip.Models;
 
 namespace Return_trip.Controllers;
@@ -15,12 +17,21 @@ public class GoodsOwnerController : Controller
     private readonly SystemDBContext _db;
     private readonly UserManager<UserAccount> _userManager;
     private readonly IConfiguration _config;
+    private readonly IDepositPaymentService _depositPaymentService;
+    private readonly IWebHostEnvironment _environment;
 
-    public GoodsOwnerController(SystemDBContext db, UserManager<UserAccount> userManager, IConfiguration config)
+    public GoodsOwnerController(
+        SystemDBContext db,
+        UserManager<UserAccount> userManager,
+        IConfiguration config,
+        IDepositPaymentService depositPaymentService,
+        IWebHostEnvironment environment)
     {
         _db = db;
         _userManager = userManager;
         _config = config;
+        _depositPaymentService = depositPaymentService;
+        _environment = environment;
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -243,6 +254,7 @@ public class GoodsOwnerController : Controller
 
         return View(new PostCargoViewModel
         {
+            WeightTonnes          = 0.2m,
             CommissionPercent     = commission == 0 ? 10m : commission,
             RetentionPeriodDays   = 7,
             AdvancePaymentPercent = 70m,
@@ -266,6 +278,11 @@ public class GoodsOwnerController : Controller
         foreach (var e in model.Validate(ctx))
             ModelState.AddModelError(e.MemberNames.FirstOrDefault() ?? string.Empty, e.ErrorMessage ?? "Invalid.");
 
+        if (!model.TermsAccepted)
+            ModelState.AddModelError(nameof(model.TermsAccepted), "You must agree to the terms and conditions before posting cargo.");
+
+        var weightKg = model.WeightTonnes * 1000m;
+
         var commission = await _db.AdminCommissionSettings
                              .OrderByDescending(s => s.UpdatedAt)
                              .Select(s => s.Percentage)
@@ -283,15 +300,15 @@ public class GoodsOwnerController : Controller
             Title                 = model.Title.Trim(),
             Description           = model.Description.Trim(),
             PackageType           = model.PackageType.Trim(),
-            WeightKg              = model.WeightKg,
+            WeightKg              = weightKg,
             PricingMode           = model.PricingMode,
             TransportCost         = model.PricingMode == "FixedTotal"
                                         ? model.TransportCost!.Value
-                                        : model.WeightKg * model.PricePerKg!.Value,
+                                        : weightKg * model.PricePerKg!.Value,
             PricePerKg            = model.PricingMode == "PerKg" ? model.PricePerKg : null,
             CommissionPercent     = commission == 0 ? 10m : commission,
             RetentionPeriodDays   = model.RetentionPeriodDays,
-            AdvancePaymentPercent = model.AdvancePaymentPercent,
+            AdvancePaymentPercent = 70m,
             FromLocation          = model.FromLocation.Trim(),
             FromPlaceId           = model.FromPlaceId,
             FromLatitude          = model.FromLatitude,
@@ -393,6 +410,12 @@ public class GoodsOwnerController : Controller
         var cargo = await _db.Cargoes.FirstOrDefaultAsync(c => c.Id == id && c.GoodsOwnerId == owner.Id);
         if (cargo == null) return NotFound();
 
+        if (cargo.Status is not ("Open" or "Closed"))
+        {
+            TempData["Error"] = "Bidding cannot be changed after a bid has been awarded.";
+            return RedirectToAction(nameof(MyListings));
+        }
+
         cargo.IsBidOpen = !cargo.IsBidOpen;
         if (!cargo.IsBidOpen && cargo.Status == "Open")
             cargo.Status = "Closed";
@@ -435,10 +458,482 @@ public class GoodsOwnerController : Controller
         return RedirectToAction(nameof(MyListings));
     }
 
-    public IActionResult Bids()
+    public async Task<IActionResult> Bids()
     {
+        var (user, owner) = await GetContextAsync();
+        SetLayoutData(user, owner, "bids");
         ViewData["Title"] = "Bids Received";
-        return View("ComingSoon");
+        ViewData["AllowDepositSimulation"] = _environment.IsDevelopment();
+
+        var bids = await _db.CargoBids
+            .AsNoTracking()
+            .Where(bid => bid.Cargo.GoodsOwnerId == owner.Id)
+            .Include(bid => bid.Cargo)
+            .Include(bid => bid.CompanyAgent)
+            .Include(bid => bid.VehicleRoute)
+                .ThenInclude(route => route.VehicleDetail)
+                    .ThenInclude(vehicle => vehicle.Company)
+            .Include(bid => bid.Payments)
+            .Include(bid => bid.FuelAdvances)
+            .OrderByDescending(bid => bid.CreatedAt)
+            .ToListAsync();
+
+        return View(new GoodsOwnerBidsViewModel
+        {
+            Bids = bids.Select(bid => new GoodsOwnerBidListItemViewModel
+            {
+                BidId = bid.Id,
+                CargoTitle = bid.Cargo.Title,
+                CargoRoute = $"{bid.Cargo.FromLocation} → {bid.Cargo.ToLocation}",
+                PackageType = bid.Cargo.PackageType,
+                WeightKg = bid.Cargo.WeightKg,
+                AgentName = bid.CompanyAgent.FullName,
+                CompanyName = bid.VehicleRoute.VehicleDetail.Company.CompanyName,
+                VehicleRegistration = bid.VehicleRoute.VehicleDetail.RegistrationNumber,
+                BidAmount = bid.BidAmount,
+                CargoAskingPrice = bid.Cargo.TransportCost,
+                SuggestedAmount = bid.SuggestedAmount,
+                SuggestionComments = bid.SuggestionComments,
+                PriceSuggestionStatus = bid.PriceSuggestionStatus,
+                BidStatus = bid.Status,
+                PaymentStatus = bid.PaymentStatus,
+                DepositAmount = bid.DepositAmount,
+                CreatedAt = bid.CreatedAt,
+                TripStatus = bid.TripStatus,
+                FinalBalance = GetFinalBalance(bid),
+                FinalPaymentReference = bid.Payments.OrderByDescending(payment => payment.SubmittedAt)
+                    .Select(payment => payment.Reference).FirstOrDefault(),
+                FinalPaymentStatus = bid.Payments.OrderByDescending(payment => payment.SubmittedAt)
+                    .Select(payment => payment.Status).FirstOrDefault(),
+            }).ToList(),
+        });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> SubmitFinalPayment(
+        SubmitFinalPaymentViewModel model,
+        CancellationToken cancellationToken)
+    {
+        var (user, owner) = await GetContextAsync();
+        if (!ModelState.IsValid)
+        {
+            TempData["Error"] = "Enter a valid payment reference and amount.";
+            return RedirectToAction(nameof(Bids));
+        }
+
+        var bid = await _db.CargoBids
+            .Include(item => item.Cargo)
+            .Include(item => item.Payments)
+            .Include(item => item.FuelAdvances)
+            .FirstOrDefaultAsync(item =>
+                item.Id == model.BidId &&
+                item.Cargo.GoodsOwnerId == owner.Id &&
+                item.Status == "Accepted",
+                cancellationToken);
+        if (bid == null) return NotFound();
+
+        var outstanding = GetFinalBalance(bid);
+        if (bid.TripStatus is not ("ArrivedAtDestination" or "AwaitingFinalPayment") ||
+            !bid.DepositPaidAt.HasValue ||
+            bid.PaymentStatus != "Paid" ||
+            bid.FuelAdvances.Any(fuel => fuel.Status != "Reconciled") ||
+            bid.Payments.Any(payment => payment.Status == "PendingVerification") ||
+            outstanding <= 0 ||
+            decimal.Round(model.Amount, 2) != outstanding)
+        {
+            TempData["Error"] = "The final payment must match the verified outstanding balance after fuel reconciliation.";
+            return RedirectToAction(nameof(Bids));
+        }
+
+        var reference = model.Reference.Trim();
+        if (await _db.CargoPayments.AnyAsync(payment => payment.Reference == reference, cancellationToken))
+        {
+            TempData["Error"] = "That transaction reference has already been submitted.";
+            return RedirectToAction(nameof(Bids));
+        }
+
+        var payment = new CargoPayment
+        {
+            CargoBidId = bid.Id,
+            Amount = outstanding,
+            Reference = reference,
+            Status = "PendingVerification",
+            SubmittedByUserAccountId = user.Id,
+            SubmittedAt = DateTime.UtcNow,
+        };
+        bid.TripStatus = "AwaitingFinalPayment";
+        _db.CargoPayments.Add(payment);
+        _db.TripActivities.Add(new TripActivity
+        {
+            CargoBidId = bid.Id,
+            UserAccountId = user.Id,
+            Activity = "FinalPaymentSubmitted",
+            Details = $"Manual payment reference {reference} submitted for KSh {outstanding:N2}.",
+        });
+
+        var agent = await _db.CompanyAgents
+            .AsNoTracking()
+            .FirstOrDefaultAsync(item => item.Id == bid.CompanyAgentId, cancellationToken);
+        if (agent?.UserAccountId is int agentAccountId)
+        {
+            _db.Notifications.Add(new Notification
+            {
+                UserAccountId = agentAccountId,
+                Title = "Final payment submitted",
+                Message = $"Manual payment for trip RT-{bid.Id:D6} is awaiting verification.",
+                Type = "Trip",
+                RelatedEntityType = "CargoBid",
+                RelatedEntityId = bid.Id,
+            });
+        }
+
+        try
+        {
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException exception) when (exception.GetBaseException() is SqlException { Number: 2601 or 2627 })
+        {
+            TempData["Error"] = "That transaction reference could not be recorded. Check that it has not already been used.";
+            return RedirectToAction(nameof(Bids));
+        }
+
+        TempData["Success"] = "Payment reference submitted. Cargo handover remains locked until an agent confirms payment.";
+        return RedirectToAction(nameof(Bids));
+    }
+
+    private static decimal GetFinalBalance(CargoBid bid)
+    {
+        var deposit = bid.PaymentStatus == "Paid" && bid.DepositPaidAt.HasValue
+            ? bid.DepositAmount ?? 0m
+            : 0m;
+        var fuel = bid.FuelAdvances.Where(item => item.Status == "Reconciled").Sum(item => item.Amount);
+        var finalPayments = bid.Payments.Where(item => item.Status == "Confirmed").Sum(item => item.Amount);
+        return Math.Max(0m, bid.BidAmount - deposit - fuel - finalPayments);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReviewPriceSuggestion(int id, bool accept)
+    {
+        var (_, owner) = await GetContextAsync();
+        var strategy = _db.Database.CreateExecutionStrategy();
+        var outcome = string.Empty;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            _db.ChangeTracker.Clear();
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var bid = await _db.CargoBids
+                .Include(item => item.Cargo)
+                .FirstOrDefaultAsync(item => item.Id == id && item.Cargo.GoodsOwnerId == owner.Id);
+
+            if (bid == null)
+            {
+                outcome = "not-found";
+                return;
+            }
+
+            if (bid.Status != "Pending" || bid.Cargo.Status != "Open" ||
+                bid.PriceSuggestionStatus != "Pending" || !bid.SuggestedAmount.HasValue)
+            {
+                outcome = "not-available";
+                return;
+            }
+
+            if (accept)
+            {
+                bid.BidAmount = bid.SuggestedAmount.Value;
+                bid.PriceSuggestionStatus = "Accepted";
+            }
+            else
+            {
+                bid.PriceSuggestionStatus = "Rejected";
+            }
+
+            bid.PriceDecisionAt = DateTime.UtcNow;
+            bid.PriceDecidedByGoodsOwnerId = owner.Id;
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            outcome = accept ? "accepted" : "rejected";
+        });
+
+        if (outcome == "not-found") return NotFound();
+        TempData[outcome == "accepted" || outcome == "rejected" ? "Success" : "Error"] = outcome switch
+        {
+            "accepted" => "Price suggestion accepted. You can now award or reject this bid.",
+            "rejected" => "Price suggestion rejected. The agent's original bid remains available for your decision.",
+            _ => "This price suggestion is no longer available for review.",
+        };
+        return RedirectToAction(nameof(Bids));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DecideBid(int id, bool accept)
+    {
+        var (_, owner) = await GetContextAsync();
+        var strategy = _db.Database.CreateExecutionStrategy();
+        string outcome = string.Empty;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            _db.ChangeTracker.Clear();
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var bid = await _db.CargoBids
+                .Include(item => item.Cargo)
+                .ThenInclude(cargo => cargo.Bids)
+                .Include(item => item.VehicleRoute)
+                .FirstOrDefaultAsync(item => item.Id == id && item.Cargo.GoodsOwnerId == owner.Id);
+
+            if (bid == null)
+            {
+                outcome = "not-found";
+                return;
+            }
+
+            if (bid.Status != "Pending" || bid.Cargo.Status != "Open" ||
+                bid.PriceSuggestionStatus == "Pending")
+            {
+                outcome = "not-available";
+                return;
+            }
+
+            if (!accept)
+            {
+                bid.Status = "Rejected";
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+                outcome = "rejected";
+                return;
+            }
+
+            var latestRouteId = await _db.VehicleRoutes
+                .Where(route => route.VehicleDetailId == bid.VehicleRoute.VehicleDetailId)
+                .OrderByDescending(route => route.UpdatedAt ?? route.CreatedAt)
+                .Select(route => route.Id)
+                .FirstAsync();
+            if (latestRouteId != bid.VehicleRouteId)
+            {
+                outcome = "vehicle-route-updated";
+                return;
+            }
+
+            if (!bid.VehicleRoute.IsAwaitingReturn)
+            {
+                outcome = "vehicle-reserved";
+                return;
+            }
+
+            bid.Status = "Accepted";
+            bid.AcceptedAt = DateTime.UtcNow;
+            bid.PaymentStatus = "AwaitingDeposit";
+            bid.DepositAmount = decimal.Round(
+                bid.BidAmount * 70m / 100m,
+                2,
+                MidpointRounding.AwayFromZero);
+            bid.Cargo.Status = "AwaitingDeposit";
+            bid.Cargo.IsBidOpen = false;
+            bid.VehicleRoute.IsAwaitingReturn = false;
+
+            foreach (var otherBid in bid.Cargo.Bids.Where(item => item.Id != bid.Id && item.Status == "Pending"))
+            {
+                otherBid.Status = "Rejected";
+                if (otherBid.PriceSuggestionStatus == "Pending")
+                {
+                    otherBid.PriceSuggestionStatus = "Rejected";
+                    otherBid.PriceDecisionAt = DateTime.UtcNow;
+                    otherBid.PriceDecidedByGoodsOwnerId = owner.Id;
+                }
+            }
+
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            outcome = "accepted";
+        });
+
+        if (outcome == "not-found") return NotFound();
+        TempData[outcome == "accepted" || outcome == "rejected" ? "Success" : "Error"] = outcome switch
+        {
+            "accepted" => "Bid awarded. The vehicle is held while the 70% deposit is pending; its cargo route activates when payment is confirmed.",
+            "rejected" => "Bid rejected.",
+            "vehicle-reserved" => "This vehicle has already been held for another awarded bid. Select a different bid or vehicle.",
+            "vehicle-route-updated" => "The agent has changed this vehicle's route since bidding. Ask them to submit an updated bid before awarding it.",
+            _ => "This bid can no longer be accepted or rejected.",
+        };
+        return RedirectToAction(nameof(Bids));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelAward(int id)
+    {
+        var (_, owner) = await GetContextAsync();
+        var strategy = _db.Database.CreateExecutionStrategy();
+        var cancelled = false;
+        var notFound = false;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            _db.ChangeTracker.Clear();
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var bid = await _db.CargoBids
+                .Include(item => item.Cargo)
+                .Include(item => item.VehicleRoute)
+                .FirstOrDefaultAsync(item =>
+                    item.Id == id &&
+                    item.Cargo.GoodsOwnerId == owner.Id);
+
+            if (bid == null)
+            {
+                notFound = true;
+                return;
+            }
+
+            if (bid.Status != "Accepted" ||
+                bid.PaymentStatus != "AwaitingDeposit" ||
+                bid.DepositPaidAt.HasValue ||
+                bid.Cargo.Status != "AwaitingDeposit")
+            {
+                return;
+            }
+
+            bid.Status = "Rejected";
+            bid.PaymentStatus = "Cancelled";
+            bid.Cargo.Status = "Open";
+            bid.Cargo.IsBidOpen = true;
+            bid.VehicleRoute.IsAwaitingReturn = true;
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            cancelled = true;
+        });
+
+        if (notFound) return NotFound();
+        TempData[cancelled ? "Success" : "Error"] = cancelled
+            ? "Award cancelled and cargo reopened. Agents may submit new bids."
+            : "This award can no longer be cancelled or is already paid.";
+        return RedirectToAction(nameof(Bids));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> SimulateDepositPayment(int id, CancellationToken cancellationToken)
+    {
+        if (!_environment.IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var (_, owner) = await GetContextAsync();
+        var bid = await _db.CargoBids
+            .Include(item => item.Cargo)
+            .Include(item => item.VehicleRoute)
+            .FirstOrDefaultAsync(item =>
+                item.Id == id &&
+                item.Cargo.GoodsOwnerId == owner.Id &&
+                item.Status == "Accepted" &&
+                item.Cargo.Status == "AwaitingDeposit" &&
+                item.PaymentStatus == "AwaitingDeposit" &&
+                !item.DepositPaidAt.HasValue,
+                cancellationToken);
+        if (bid == null) return NotFound();
+
+        var payment = await _depositPaymentService.SimulateSuccessfulPaymentAsync(
+            bid.DepositAmount ?? throw new InvalidOperationException("The awarded bid has no deposit amount."),
+            cancellationToken);
+        var strategy = _db.Database.CreateExecutionStrategy();
+        var completed = false;
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            _db.ChangeTracker.Clear();
+            await using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            var confirmedBid = await _db.CargoBids
+                .Include(item => item.Cargo)
+                .Include(item => item.VehicleRoute)
+                .FirstOrDefaultAsync(item =>
+                    item.Id == id &&
+                    item.Cargo.GoodsOwnerId == owner.Id &&
+                    item.Status == "Accepted" &&
+                    item.Cargo.Status == "AwaitingDeposit" &&
+                    item.PaymentStatus == "AwaitingDeposit" &&
+                    !item.DepositPaidAt.HasValue,
+                    cancellationToken);
+
+            if (confirmedBid == null)
+            {
+                return;
+            }
+
+            var cargo = confirmedBid.Cargo;
+            var route = confirmedBid.VehicleRoute;
+            var pickupAt = cargo.PickupDateTime ?? cargo.RequiredDepartureAt ?? DateTime.UtcNow.Date;
+            var arrivalAt = cargo.DeliveryDeadlineAt ?? route.ExpectedArrivalAt;
+            if (arrivalAt < pickupAt)
+            {
+                arrivalAt = pickupAt;
+            }
+
+            route.FromLocation = cargo.FromLocation;
+            route.FromPlaceId = cargo.FromPlaceId;
+            route.FromLatitude = cargo.FromLatitude;
+            route.FromLongitude = cargo.FromLongitude;
+            route.ToLocation = cargo.ToLocation;
+            route.ToPlaceId = cargo.ToPlaceId;
+            route.ToLatitude = cargo.ToLatitude;
+            route.ToLongitude = cargo.ToLongitude;
+            route.TripStartsAt = pickupAt;
+            route.ExpectedArrivalAt = arrivalAt;
+            route.ReturnAvailabilityStartsAt = null;
+            route.ReturnAvailabilityEndsAt = null;
+            route.RoutePathJson = null;
+            route.MapProvider = null;
+            route.IsAwaitingReturn = false;
+            route.UpdatedAt = payment.PaidAt;
+
+            confirmedBid.PaymentStatus = "Paid";
+            confirmedBid.DepositPaidAt = payment.PaidAt;
+            confirmedBid.PaymentReference = payment.Reference;
+            confirmedBid.EstimatedVehicleArrivalAt = arrivalAt;
+            confirmedBid.TripStatus = "ReadyForPickup";
+            cargo.Status = "Booked";
+
+            _db.TripActivities.Add(new TripActivity
+            {
+                CargoBidId = confirmedBid.Id,
+                UserAccountId = owner.UserAccountId,
+                Activity = "DepositConfirmed",
+                Details = "The initial deposit was confirmed; receiver contact access and pickup are enabled.",
+                CreatedAt = payment.PaidAt,
+            });
+            if (confirmedBid.DriverId is int assignedDriverId)
+            {
+                var driverAccountId = await _db.Drivers
+                    .Where(driver => driver.Id == assignedDriverId)
+                    .Select(driver => driver.UserAccountId)
+                    .SingleOrDefaultAsync(cancellationToken);
+                if (driverAccountId.HasValue)
+                {
+                    _db.Notifications.Add(new Notification
+                    {
+                        UserAccountId = driverAccountId.Value,
+                        Title = "Initial deposit confirmed",
+                        Message = $"Trip RT-{confirmedBid.Id:D6} is ready for pickup. Receiver contact details are available in your trips dashboard.",
+                        Type = "Trip",
+                        RelatedEntityType = "CargoBid",
+                        RelatedEntityId = confirmedBid.Id,
+                    });
+                }
+            }
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            completed = true;
+        });
+
+        if (!completed)
+        {
+            TempData["Error"] = "The deposit could not be confirmed because this booking has changed. Refresh the bids page.";
+            return RedirectToAction(nameof(Bids));
+        }
+
+        TempData["Success"] = "Simulated 70% deposit recorded. The vehicle is now reserved and its route is updated to the cargo journey.";
+        return RedirectToAction(nameof(Bids));
     }
 
     public IActionResult InTransit()

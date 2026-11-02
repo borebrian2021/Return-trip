@@ -1,0 +1,189 @@
+@model Return_trip.Models.DriverDashboardViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["DashRole"] = "Driver";
+    ViewData["ActiveNav"] = "driver-trips";
+    ViewData["Title"] = "My Trips";
+}
+
+<div class="dash-page-header">
+    <div>
+        <h1><i class="fa fa-truck me-2" style="color:#1a3c5e;font-size:20px;"></i>My Trips</h1>
+        <p class="dash-page-header__sub">Manage assigned deliveries and view payment-gated trip information.</p>
+    </div>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+<div class="dash-stat-grid driver-stat-grid">
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--blue"><i class="fa fa-boxes-stacked"></i></div>
+        <div class="dash-stat-card__body"><div class="dash-stat-card__value">@Model.TotalTrips</div><div class="dash-stat-card__label">Total trips</div></div>
+    </div>
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--green"><i class="fa fa-route"></i></div>
+        <div class="dash-stat-card__body"><div class="dash-stat-card__value">@Model.ActiveTrips</div><div class="dash-stat-card__label">Active</div></div>
+    </div>
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--amber"><i class="fa fa-clock"></i></div>
+        <div class="dash-stat-card__body"><div class="dash-stat-card__value">@Model.AwaitingPickup</div><div class="dash-stat-card__label">Awaiting pickup</div></div>
+    </div>
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--teal"><i class="fa fa-truck-fast"></i></div>
+        <div class="dash-stat-card__body"><div class="dash-stat-card__value">@Model.InTransit</div><div class="dash-stat-card__label">In transit</div></div>
+    </div>
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--purple"><i class="fa fa-wallet"></i></div>
+        <div class="dash-stat-card__body"><div class="dash-stat-card__value">@Model.AwaitingPayment</div><div class="dash-stat-card__label">Awaiting payment</div></div>
+    </div>
+    <div class="dash-stat-card">
+        <div class="dash-stat-card__icon dash-stat-card__icon--green"><i class="fa fa-circle-check"></i></div>
+        <div class="dash-stat-card__body"><div class="dash-stat-card__value">@Model.CompletedTrips</div><div class="dash-stat-card__label">Completed</div></div>
+    </div>
+</div>
+
+<section class="dash-panel mb-4">
+    <div class="dash-panel__header">
+        <h2 class="dash-panel__title"><i class="fa fa-id-card me-2" style="color:#1a3c5e;"></i>Driver profile</h2>
+    </div>
+    <div class="driver-profile-body">
+        <div class="row g-3">
+            <div class="col-md-4"><strong>Name</strong><span>@Model.DriverName</span></div>
+            <div class="col-md-4"><strong>Phone</strong><span>@Model.PhoneNumber</span></div>
+            <div class="col-md-4"><strong>Licence</strong><span>@Model.LicenseNumber</span></div>
+            <div class="col-md-4"><strong>Assigned vehicle</strong><span>@Model.AssignedVehicle</span></div>
+            <div class="col-md-4"><strong>Status</strong><span>@Model.DriverStatus</span></div>
+            <div class="col-md-4"><strong>Active trip</strong><span>@(Model.CurrentActiveTrip ?? "None")</span></div>
+            <div class="col-md-6"><strong>Last cargo</strong><span>@(Model.LastCargoTransported ?? "No completed trips")</span></div>
+            <div class="col-md-6"><strong>Last delivery</strong><span>@(Model.LastDeliveryAt?.ToLocalTime().ToString("dd MMM yyyy HH:mm") ?? "Not available")</span></div>
+        </div>
+    </div>
+</section>
+
+@if (Model.Trips.Count == 0)
+{
+    <div class="dash-panel">
+        <div class="dash-empty">
+            <i class="fa fa-truck"></i>
+            <p>No trips have been assigned to your driver account.</p>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var trip in Model.Trips)
+    {
+        <section class="dash-panel mb-4">
+            <div class="dash-panel__header">
+                <div>
+                    <h2 class="dash-panel__title">@trip.Reference · @trip.CargoTitle</h2>
+                    <span class="td-muted">Assigned @trip.AssignedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</span>
+                </div>
+                <span class="status-pill">@trip.TripStatus</span>
+            </div>
+
+            <div class="driver-trip-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <p><strong>Cargo:</strong> @trip.Description · @trip.WeightKg.ToString("N0") kg</p>
+                    <p><strong>Route:</strong> @trip.PickupLocation → @trip.Destination</p>
+                    <p><strong>Vehicle:</strong> @trip.VehicleRegistration</p>
+                    <p><strong>Payment:</strong> @trip.PaymentStatus</p>
+                    <p><strong>Trip cost:</strong> KSh @trip.TripCost.ToString("N2")</p>
+                    <p><strong>Confirmed deposit:</strong> KSh @trip.Deposit.ToString("N2")</p>
+                    @if (trip.FuelCredit > 0)
+                    {
+                        <p><strong>Approved fuel credit:</strong> KSh @trip.FuelCredit.ToString("N2")</p>
+                    }
+                    <p><strong>Unpaid balance:</strong> KSh @trip.FinalBalance.ToString("N2")</p>
+                </div>
+                <div class="col-md-6">
+                    @if (trip.ReceiverPhone != null)
+                    {
+                        <div class="alert alert-success">
+                            <strong>Receiver contact</strong><br />
+                            @trip.ReceiverName · @trip.ReceiverPhone
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">Receiver contact is hidden until the initial deposit is confirmed.</div>
+                    }
+
+                    @if (trip.TripStatus == "ReadyForPickup")
+                    {
+                        <form asp-action="AdvanceTrip" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@trip.BidId" />
+                            <input type="hidden" name="action" value="pickup" />
+                            <button class="btn btn-primary" type="submit">Confirm cargo pickup</button>
+                        </form>
+                    }
+                    @if (trip.TripStatus == "CargoPickedUp")
+                    {
+                        <form asp-action="AdvanceTrip" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@trip.BidId" />
+                            <input type="hidden" name="action" value="depart" />
+                            <button class="btn btn-primary" type="submit">Start trip</button>
+                        </form>
+                    }
+                    @if (trip.TripStatus == "InTransit")
+                    {
+                        <form asp-action="AdvanceTrip" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@trip.BidId" />
+                            <input type="hidden" name="action" value="arrive" />
+                            <button class="btn btn-primary" type="submit">Record arrival</button>
+                        </form>
+                    }
+                    @if (trip.TripStatus == "PaymentConfirmed")
+                    {
+                        <form asp-action="SubmitDeliveryEvidence" method="post" enctype="multipart/form-data" class="mt-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="BidId" value="@trip.BidId" />
+                            <div class="mb-2">
+                                <label class="form-label" for="receiver-@trip.BidId">Receiver name on signed document</label>
+                                <input class="form-control" id="receiver-@trip.BidId" name="ReceiverName" maxlength="200" required />
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label" for="evidence-@trip.BidId">Signed delivery document (JPEG, PNG, PDF; max 10 MB)</label>
+                                <input class="form-control" id="evidence-@trip.BidId" name="SignedDocument" type="file" accept="image/jpeg,image/png,application/pdf" required />
+                            </div>
+                            <button class="btn btn-success" type="submit">Submit handover evidence</button>
+                        </form>
+                    }
+                    @if (trip.TripStatus == "AwaitingAgentVerification")
+                    {
+                        <p class="text-info mb-0">Delivery evidence is awaiting agent review.</p>
+                    }
+                    @if (trip.TripStatus == "Closed")
+                    {
+                        <p class="text-success mb-0">Trip closed and delivery verified.</p>
+                    }
+                </div>
+            </div>
+
+            @if (trip.Activities.Count > 0)
+            {
+                <details class="mt-3">
+                    <summary>Trip activity history</summary>
+                    <ul class="mt-2">
+                        @foreach (var item in trip.Activities)
+                        {
+                            <li><strong>@item.Activity</strong> — @item.Details <span class="td-muted">(@item.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm"))</span></li>
+                        }
+                    </ul>
+                </details>
+            }
+            </div>
+        </section>
+    }
+}
